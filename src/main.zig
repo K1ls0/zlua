@@ -17,7 +17,7 @@ pub fn main() !void {
     var lua_alloc = std.heap.GeneralPurposeAllocator(.{ .safety = false }){};
     defer std.debug.assert(lua_alloc.deinit() == .ok);
 
-    var state = try zlua.State.init(
+    var state = try zlua.State(void).init(
         lua_alloc.allocator(),
         .{
             .lib = zlua.StdLib.all(),

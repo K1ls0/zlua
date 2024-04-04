@@ -16,52 +16,52 @@ pub const LuaError = error{
     PointerNull,
 };
 
-const __builtin_expect = std.zig.c_builtins.__builtin_expect;
+//const __builtin_expect = std.zig.c_builtins.__builtin_expect;
 
-extern var stdin: [*c]FILE;
-extern var stdout: [*c]FILE;
-extern var stderr: [*c]FILE;
+//extern var stdin: [*c]FILE;
+//extern var stdout: [*c]FILE;
+//extern var stderr: [*c]FILE;
+//
+//extern fn fflush(__stream: [*c]FILE) c_int;
+//extern fn snprintf(__s: [*c]u8, __maxlen: c_ulong, __format: [*c]const u8, ...) c_int;
+//extern fn fwrite(__ptr: ?*const anyopaque, __size: c_ulong, __n: c_ulong, __s: [*c]FILE) c_ulong;
+//extern fn fprintf(__stream: [*c]FILE, __format: [*c]const u8, ...) c_int;
 
-extern fn fflush(__stream: [*c]FILE) c_int;
-extern fn snprintf(__s: [*c]u8, __maxlen: c_ulong, __format: [*c]const u8, ...) c_int;
-extern fn fwrite(__ptr: ?*const anyopaque, __size: c_ulong, __n: c_ulong, __s: [*c]FILE) c_ulong;
-extern fn fprintf(__stream: [*c]FILE, __format: [*c]const u8, ...) c_int;
-
-const _IO_lock_t = anyopaque;
-const struct__IO_marker = opaque {};
-const struct__IO_codecvt = opaque {};
-const struct__IO_wide_data = opaque {};
-const FILE = extern struct {
-    _flags: c_int = std.mem.zeroes(c_int),
-    _IO_read_ptr: [*c]u8 = std.mem.zeroes([*c]u8),
-    _IO_read_end: [*c]u8 = std.mem.zeroes([*c]u8),
-    _IO_read_base: [*c]u8 = std.mem.zeroes([*c]u8),
-    _IO_write_base: [*c]u8 = std.mem.zeroes([*c]u8),
-    _IO_write_ptr: [*c]u8 = std.mem.zeroes([*c]u8),
-    _IO_write_end: [*c]u8 = std.mem.zeroes([*c]u8),
-    _IO_buf_base: [*c]u8 = std.mem.zeroes([*c]u8),
-    _IO_buf_end: [*c]u8 = std.mem.zeroes([*c]u8),
-    _IO_save_base: [*c]u8 = std.mem.zeroes([*c]u8),
-    _IO_backup_base: [*c]u8 = std.mem.zeroes([*c]u8),
-    _IO_save_end: [*c]u8 = std.mem.zeroes([*c]u8),
-    _markers: ?*struct__IO_marker = std.mem.zeroes(?*struct__IO_marker),
-    _chain: [*c]FILE = std.mem.zeroes([*c]FILE),
-    _fileno: c_int = std.mem.zeroes(c_int),
-    _flags2: c_int = std.mem.zeroes(c_int),
-    _old_offset: c_long = std.mem.zeroes(c_long),
-    _cur_column: c_ushort = std.mem.zeroes(c_ushort),
-    _vtable_offset: i8 = std.mem.zeroes(i8),
-    _shortbuf: [1]u8 = std.mem.zeroes([1]u8),
-    _lock: ?*_IO_lock_t = std.mem.zeroes(?*_IO_lock_t),
-    _offset: c_long = std.mem.zeroes(c_long),
-    _codecvt: ?*struct__IO_codecvt = std.mem.zeroes(?*struct__IO_codecvt),
-    _wide_data: ?*struct__IO_wide_data = std.mem.zeroes(?*struct__IO_wide_data),
-    _freeres_list: [*c]FILE = std.mem.zeroes([*c]FILE),
-    _freeres_buf: ?*anyopaque = std.mem.zeroes(?*anyopaque),
-    __pad5: usize = std.mem.zeroes(usize),
-    _mode: c_int = std.mem.zeroes(c_int),
-    _unused2: [20]u8 = std.mem.zeroes([20]u8),
-};
+//const _IO_lock_t = anyopaque;
+//const struct__IO_marker = opaque {};
+//const struct__IO_codecvt = opaque {};
+//const struct__IO_wide_data = opaque {};
+//const FILE = extern struct {
+//    _flags: c_int = std.mem.zeroes(c_int),
+//    _IO_read_ptr: [*c]u8 = std.mem.zeroes([*c]u8),
+//    _IO_read_end: [*c]u8 = std.mem.zeroes([*c]u8),
+//    _IO_read_base: [*c]u8 = std.mem.zeroes([*c]u8),
+//    _IO_write_base: [*c]u8 = std.mem.zeroes([*c]u8),
+//    _IO_write_ptr: [*c]u8 = std.mem.zeroes([*c]u8),
+//    _IO_write_end: [*c]u8 = std.mem.zeroes([*c]u8),
+//    _IO_buf_base: [*c]u8 = std.mem.zeroes([*c]u8),
+//    _IO_buf_end: [*c]u8 = std.mem.zeroes([*c]u8),
+//    _IO_save_base: [*c]u8 = std.mem.zeroes([*c]u8),
+//    _IO_backup_base: [*c]u8 = std.mem.zeroes([*c]u8),
+//    _IO_save_end: [*c]u8 = std.mem.zeroes([*c]u8),
+//    _markers: ?*struct__IO_marker = std.mem.zeroes(?*struct__IO_marker),
+//    _chain: [*c]FILE = std.mem.zeroes([*c]FILE),
+//    _fileno: c_int = std.mem.zeroes(c_int),
+//    _flags2: c_int = std.mem.zeroes(c_int),
+//    _old_offset: c_long = std.mem.zeroes(c_long),
+//    _cur_column: c_ushort = std.mem.zeroes(c_ushort),
+//    _vtable_offset: i8 = std.mem.zeroes(i8),
+//    _shortbuf: [1]u8 = std.mem.zeroes([1]u8),
+//    _lock: ?*_IO_lock_t = std.mem.zeroes(?*_IO_lock_t),
+//    _offset: c_long = std.mem.zeroes(c_long),
+//    _codecvt: ?*struct__IO_codecvt = std.mem.zeroes(?*struct__IO_codecvt),
+//    _wide_data: ?*struct__IO_wide_data = std.mem.zeroes(?*struct__IO_wide_data),
+//    _freeres_list: [*c]FILE = std.mem.zeroes([*c]FILE),
+//    _freeres_buf: ?*anyopaque = std.mem.zeroes(?*anyopaque),
+//    __pad5: usize = std.mem.zeroes(usize),
+//    _mode: c_int = std.mem.zeroes(c_int),
+//    _unused2: [20]u8 = std.mem.zeroes([20]u8),
+//};
 
 pub const lua_Hook = ?*const fn (?*c.lua_State, [*c]c.lua_Debug) callconv(.C) void;
 pub const lua_ident: [*c]const u8 = @extern([*c]const u8, .{
@@ -87,10 +87,10 @@ pub const luaL_Reg = extern struct {
     name: [*c]const u8 = std.mem.zeroes([*c]const u8),
     func: c.lua_CFunction = std.mem.zeroes(c.lua_CFunction),
 };
-pub const luaL_Stream = extern struct {
-    f: [*c]FILE = std.mem.zeroes([*c]FILE),
-    closef: c.lua_CFunction = std.mem.zeroes(c.lua_CFunction),
-};
+//pub const luaL_Stream = extern struct {
+//    f: [*c]FILE = std.mem.zeroes([*c]FILE),
+//    closef: c.lua_CFunction = std.mem.zeroes(c.lua_CFunction),
+//};
 pub const LUAI_IS32INT = (std.math.maxInt(c_uint) >> 30) >= 3;
 pub const LUA_INT_INT = 1;
 pub const LUA_INT_LONG = 2;
@@ -107,26 +107,21 @@ pub const LUA_FLOAT_TYPE = LUA_FLOAT_DEFAULT;
 pub const LUA_PATH_SEP = ";";
 pub const LUA_PATH_MARK = "?";
 pub const LUA_EXEC_DIR = "!";
-pub const LUA_VDIR = LUA_VERSION_MAJOR ++ "." ++ LUA_VERSION_MINOR;
 pub const LUA_ROOT = "/usr/local/";
-pub const LUA_LDIR = LUA_ROOT ++ "share/lua/" ++ LUA_VDIR ++ "/";
-pub const LUA_CDIR = LUA_ROOT ++ "lib/lua/" ++ LUA_VDIR ++ "/";
-pub const LUA_PATH_DEFAULT = LUA_LDIR ++ "?.lua;" ++ LUA_LDIR ++ "?/init.lua;" ++ LUA_CDIR ++ "?.lua;" ++ LUA_CDIR ++ "?/init.lua;" ++ "./?.lua;" ++ "./?/init.lua";
-pub const LUA_CPATH_DEFAULT = LUA_CDIR ++ "?.so;" ++ LUA_CDIR ++ "loadall.so;" ++ "./?.so";
 pub const LUA_DIRSEP = "/";
 pub const LUAI_DDEF = "";
-pub inline fn lua_number2str(s: [*c]u8, sz: c_ulong, n: anytype) c_int {
-    return snprintf(s, sz, LUA_NUMBER_FMT, LUAI_UACNUMBER(n));
-}
+//pub inline fn lua_number2str(s: [*c]u8, sz: c_ulong, n: anytype) c_int {
+//    return snprintf(s, sz, LUA_NUMBER_FMT, LUAI_UACNUMBER(n));
+//}
 pub const LUA_NUMBER = f64;
 pub const LUAI_UACNUMBER = f64;
 pub const LUA_NUMBER_FRMLEN = "";
 pub const LUA_NUMBER_FMT = "%.14g";
 pub const LUA_INTEGER_FMT = "%" ++ LUA_INTEGER_FRMLEN ++ "d";
 pub const LUAI_UACINT = LUA_INTEGER;
-pub inline fn lua_integer2str(s: [*c]u8, sz: c_ulong, n: anytype) c_int {
-    return snprintf(s, sz, LUA_INTEGER_FMT, LUAI_UACINT(n));
-}
+//pub inline fn lua_integer2str(s: [*c]u8, sz: c_ulong, n: anytype) c_int {
+//    return snprintf(s, sz, LUA_INTEGER_FMT, LUAI_UACINT(n));
+//}
 pub const LUA_UNSIGNED = c_uint ++ LUAI_UACINT;
 pub const LUA_INTEGER = c_longlong;
 pub const LUA_INTEGER_FRMLEN = "ll";
@@ -135,26 +130,10 @@ pub const LUA_MININTEGER = std.math.minInt(c_longlong);
 pub const LUA_MAXUNSIGNED = std.math.maxInt(c_ulonglong);
 pub const LUA_KCONTEXT = c_long;
 
-pub inline fn luai_likely(x: anytype) c_long {
-    return __builtin_expect(x != 0, 1);
-}
-pub inline fn luai_unlikely(x: anytype) c_long {
-    return __builtin_expect(x != 0, 0);
-}
 pub const LUAI_MAXSTACK = std.zig.c_translation.promoteIntLiteral(c_int, 1000000, .decimal);
 pub const LUA_EXTRASPACE = std.zig.c_translation.sizeof(?*anyopaque);
 pub const LUA_IDSIZE = 60;
 pub const LUAL_BUFFERSIZE = std.zig.c_translation.cast(c_int, (16 * std.zig.c_translation.sizeof(?*anyopaque)) * std.zig.c_translation.sizeof(c.lua_Number));
-pub const LUA_VERSION_MAJOR = "5";
-pub const LUA_VERSION_MINOR = "4";
-pub const LUA_VERSION_RELEASE = "6";
-pub const LUA_VERSION_NUM = 504;
-pub const LUA_VERSION_RELEASE_NUM = (LUA_VERSION_NUM * 100) + 6;
-pub const LUA_VERSION = "Lua " ++ LUA_VERSION_MAJOR ++ "." ++ LUA_VERSION_MINOR;
-pub const LUA_RELEASE = LUA_VERSION ++ "." ++ LUA_VERSION_RELEASE;
-pub const LUA_COPYRIGHT = LUA_RELEASE ++ "  Copyright (C) 1994-2023 Lua.org, PUC-Rio";
-pub const LUA_AUTHORS = "R. Ierusalimschy, L. H. de Figueiredo, W. Celes";
-pub const LUA_SIGNATURE = "\x1bLua";
 pub const LUA_MULTRET = -1;
 pub const LUA_REGISTRYINDEX = -LUAI_MAXSTACK - 1000;
 pub inline fn lua_upvalueindex(i: c_int) c_int {
@@ -296,20 +275,9 @@ pub const LUA_PRELOAD_TABLE = "_PRELOAD";
 pub const LUAL_NUMSIZES = (std.zig.c_translation.sizeof(c.lua_Integer) * 16) + std.zig.c_translation.sizeof(c.lua_Number);
 pub const LUA_NOREF = -2;
 pub const LUA_REFNIL = -1;
+
 pub inline fn luaL_loadfile(L: ?*c.lua_State, f: [*c]const u8) @TypeOf(c.luaL_loadfilex(L, f, null)) {
     return c.luaL_loadfilex(L, f, null);
-}
-pub inline fn luaL_argcheck(L: ?*c.lua_State, cond: anytype, arg: c_int, extramsg: [*c]const u8) anyopaque {
-    return std.zig.c_translation.cast(
-        anyopaque,
-        (luai_likely(cond) != 0) or (c.luaL_argerror(L, arg, extramsg) != 0),
-    );
-}
-pub inline fn luaL_argexpected(L: ?*c.lua_State, cond: anytype, arg: c_int, tname: [*c]const u8) anyopaque {
-    return std.zig.c_translation.cast(
-        anyopaque,
-        (luai_likely(cond) != 0) or (c.luaL_typeerror(L, arg, tname) != 0),
-    );
 }
 pub inline fn luaL_checkstring(L: ?*c.lua_State, n: c_int) [*c]const u8 {
     return c.luaL_checklstring(L, n, null);
@@ -361,38 +329,7 @@ pub inline fn luaL_buffaddr(bf: anytype) @TypeOf(bf.*.b) {
 pub inline fn luaL_prepbuffer(B: anytype) @TypeOf(c.luaL_prepbuffsize(B, LUAL_BUFFERSIZE)) {
     return c.luaL_prepbuffsize(B, LUAL_BUFFERSIZE);
 }
-pub const LUA_FILEHANDLE = "FILE*";
-pub inline fn lua_writestring(s: anytype, l: anytype) @TypeOf(fwrite(s, std.zig.c_translation.sizeof(u8), l, stdout)) {
-    return fwrite(s, std.zig.c_translation.sizeof(u8), l, stdout);
-}
-pub inline fn lua_writeline() c_int {
-    _ = lua_writestring("\n", 1);
-    return fflush(stdout);
-}
-pub inline fn lua_writestringerror(s: anytype, p: anytype) c_int {
-    _ = fprintf(stderr, s, p);
-    return fflush(stderr);
-}
 
-pub const LUA_VERSUFFIX = "_" ++ LUA_VERSION_MAJOR ++ "_" ++ LUA_VERSION_MINOR;
-pub const LUA_COLIBNAME = "coroutine";
-pub const LUA_TABLIBNAME = "table";
-pub const LUA_IOLIBNAME = "io";
-pub const LUA_OSLIBNAME = "os";
-pub const LUA_STRLIBNAME = "string";
-pub const LUA_UTF8LIBNAME = "utf8";
-pub const LUA_MATHLIBNAME = "math";
-pub const LUA_DBLIBNAME = "debug";
-pub const LUA_LOADLIBNAME = "package";
-
-pub fn printCurrentDbg(s: *c.lua_State) void {
-    var dbg_info: c.lua_Debug = undefined;
-    if (c.lua_getstack(s, 0, &dbg_info) != 0) {
-        log.err("Could not get lua runtime stack information.", .{});
-        return;
-    }
-    log.debug("dbg info {any}", .{dbg_info});
-}
 pub inline fn lua_newuserdata(L: *c.lua_State, s: usize) ?*anyopaque {
     return c.lua_newuserdatauv(L, s, 1);
 }
