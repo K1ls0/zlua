@@ -91,17 +91,17 @@ pub const luaL_Stream = extern struct {
     f: [*c]FILE = std.mem.zeroes([*c]FILE),
     closef: c.lua_CFunction = std.mem.zeroes(c.lua_CFunction),
 };
-pub const LUAI_IS32INT = (std.math.maxInt(c_uint) >> @as(c_int, 30)) >= 3;
-pub const LUA_INT_INT = @as(c_int, 1);
-pub const LUA_INT_LONG = @as(c_int, 2);
-pub const LUA_INT_LONGLONG = @as(c_int, 3);
-pub const LUA_FLOAT_FLOAT = @as(c_int, 1);
-pub const LUA_FLOAT_DOUBLE = @as(c_int, 2);
-pub const LUA_FLOAT_LONGDOUBLE = @as(c_int, 3);
+pub const LUAI_IS32INT = (std.math.maxInt(c_uint) >> 30) >= 3;
+pub const LUA_INT_INT = 1;
+pub const LUA_INT_LONG = 2;
+pub const LUA_INT_LONGLONG = 3;
+pub const LUA_FLOAT_FLOAT = 1;
+pub const LUA_FLOAT_DOUBLE = 2;
+pub const LUA_FLOAT_LONGDOUBLE = 3;
 pub const LUA_INT_DEFAULT = LUA_INT_LONGLONG;
 pub const LUA_FLOAT_DEFAULT = LUA_FLOAT_DOUBLE;
-pub const LUA_32BITS = @as(c_int, 0);
-pub const LUA_C89_NUMBERS = @as(c_int, 0);
+pub const LUA_32BITS = 0;
+pub const LUA_C89_NUMBERS = 0;
 pub const LUA_INT_TYPE = LUA_INT_DEFAULT;
 pub const LUA_FLOAT_TYPE = LUA_FLOAT_DEFAULT;
 pub const LUA_PATH_SEP = ";";
@@ -143,81 +143,78 @@ pub inline fn luai_unlikely(x: anytype) c_long {
 }
 pub const LUAI_MAXSTACK = std.zig.c_translation.promoteIntLiteral(c_int, 1000000, .decimal);
 pub const LUA_EXTRASPACE = std.zig.c_translation.sizeof(?*anyopaque);
-pub const LUA_IDSIZE = @as(c_int, 60);
+pub const LUA_IDSIZE = 60;
 pub const LUAL_BUFFERSIZE = std.zig.c_translation.cast(c_int, (16 * std.zig.c_translation.sizeof(?*anyopaque)) * std.zig.c_translation.sizeof(c.lua_Number));
 pub const LUA_VERSION_MAJOR = "5";
 pub const LUA_VERSION_MINOR = "4";
 pub const LUA_VERSION_RELEASE = "6";
-pub const LUA_VERSION_NUM = @as(c_int, 504);
-pub const LUA_VERSION_RELEASE_NUM = (LUA_VERSION_NUM * @as(c_int, 100)) + @as(c_int, 6);
+pub const LUA_VERSION_NUM = 504;
+pub const LUA_VERSION_RELEASE_NUM = (LUA_VERSION_NUM * 100) + 6;
 pub const LUA_VERSION = "Lua " ++ LUA_VERSION_MAJOR ++ "." ++ LUA_VERSION_MINOR;
 pub const LUA_RELEASE = LUA_VERSION ++ "." ++ LUA_VERSION_RELEASE;
 pub const LUA_COPYRIGHT = LUA_RELEASE ++ "  Copyright (C) 1994-2023 Lua.org, PUC-Rio";
 pub const LUA_AUTHORS = "R. Ierusalimschy, L. H. de Figueiredo, W. Celes";
 pub const LUA_SIGNATURE = "\x1bLua";
-pub const LUA_MULTRET = -@as(c_int, 1);
-pub const LUA_REGISTRYINDEX = -LUAI_MAXSTACK - @as(c_int, 1000);
+pub const LUA_MULTRET = -1;
+pub const LUA_REGISTRYINDEX = -LUAI_MAXSTACK - 1000;
 pub inline fn lua_upvalueindex(i: c_int) c_int {
     return LUA_REGISTRYINDEX - i;
 }
-pub const LUA_OK = @as(c_int, 0);
-pub const LUA_YIELD = @as(c_int, 1);
-pub const LUA_ERRRUN = @as(c_int, 2);
-pub const LUA_ERRSYNTAX = @as(c_int, 3);
-pub const LUA_ERRMEM = @as(c_int, 4);
-pub const LUA_ERRERR = @as(c_int, 5);
-pub const LUA_TNONE = -@as(c_int, 1);
-pub const LUA_TNIL = @as(c_int, 0);
-pub const LUA_TBOOLEAN = @as(c_int, 1);
-pub const LUA_TLIGHTUSERDATA = @as(c_int, 2);
-pub const LUA_TNUMBER = @as(c_int, 3);
-pub const LUA_TSTRING = @as(c_int, 4);
-pub const LUA_TTABLE = @as(c_int, 5);
-pub const LUA_TFUNCTION = @as(c_int, 6);
-pub const LUA_TUSERDATA = @as(c_int, 7);
-pub const LUA_TTHREAD = @as(c_int, 8);
-pub const LUA_NUMTYPES = @as(c_int, 9);
-pub const LUA_MINSTACK = @as(c_int, 20);
-pub const LUA_RIDX_MAINTHREAD = @as(c_int, 1);
-pub const LUA_RIDX_GLOBALS = @as(c_int, 2);
-pub const LUA_RIDX_LAST = LUA_RIDX_GLOBALS;
-pub const LUA_OPADD = @as(c_int, 0);
-pub const LUA_OPSUB = @as(c_int, 1);
-pub const LUA_OPMUL = @as(c_int, 2);
-pub const LUA_OPMOD = @as(c_int, 3);
-pub const LUA_OPPOW = @as(c_int, 4);
-pub const LUA_OPDIV = @as(c_int, 5);
-pub const LUA_OPIDIV = @as(c_int, 6);
-pub const LUA_OPBAND = @as(c_int, 7);
-pub const LUA_OPBOR = @as(c_int, 8);
-pub const LUA_OPBXOR = @as(c_int, 9);
-pub const LUA_OPSHL = @as(c_int, 10);
-pub const LUA_OPSHR = @as(c_int, 11);
-pub const LUA_OPUNM = @as(c_int, 12);
-pub const LUA_OPBNOT = @as(c_int, 13);
-pub const LUA_OPEQ = @as(c_int, 0);
-pub const LUA_OPLT = @as(c_int, 1);
-pub const LUA_OPLE = @as(c_int, 2);
+pub const LuaType = enum(i8) {
+    none = c.LUA_TNONE,
+    nil = c.LUA_TNIL,
+    boolean = c.LUA_TBOOLEAN,
+    lightuserdata = c.LUA_TLIGHTUSERDATA,
+    number = c.LUA_TNUMBER,
+    string = c.LUA_TSTRING,
+    table = c.LUA_TTABLE,
+    function = c.LUA_TFUNCTION,
+    userdata = c.LUA_TUSERDATA,
+    thread = c.LUA_TTHREAD,
+};
+
+pub const LuaOp = enum(u8) {
+    add = c.LUA_OPADD,
+    sub = c.LUA_OPSUB,
+    mul = c.LUA_OPMUL,
+    mod = c.LUA_OPMOD,
+    pow = c.LUA_OPPOW,
+    div = c.LUA_OPDIV,
+    idiv = c.LUA_OPIDIV,
+    band = c.LUA_OPBAND,
+    bor = c.LUA_OPBOR,
+    bxor = c.LUA_OPBXOR,
+    shl = c.LUA_OPSHL,
+    shr = c.LUA_OPSHR,
+    unm = c.LUA_OPUNM,
+    bnot = c.LUA_OPBNOT,
+};
+
+pub const LuaOpRel = enum(u8) {
+    eq = c.LUA_OPEQ,
+    lt = c.LUA_OPLT,
+    le = c.LUA_OPLE,
+};
 pub inline fn lua_call(L: ?*c.lua_State, n: c_int, r: c_int) void {
-    return c.lua_callk(L, n, r, @as(c_int, 0), null);
+    return c.lua_callk(L, n, r, 0, null);
 }
 pub inline fn lua_pcall(L: ?*c.lua_State, nargs: c_int, nresults: c_int, errfunc: c_int) c_int {
-    return c.lua_pcallk(L, nargs, nresults, errfunc, @as(c_int, 0), null);
+    return c.lua_pcallk(L, nargs, nresults, errfunc, 0, null);
 }
 pub inline fn lua_yield(L: ?*c.lua_State, n: c_int) c_int {
-    return c.lua_yieldk(L, n, @as(c_int, 0), null);
+    return c.lua_yieldk(L, n, 0, null);
 }
-pub const LUA_GCSTOP = @as(c_int, 0);
-pub const LUA_GCRESTART = @as(c_int, 1);
-pub const LUA_GCCOLLECT = @as(c_int, 2);
-pub const LUA_GCCOUNT = @as(c_int, 3);
-pub const LUA_GCCOUNTB = @as(c_int, 4);
-pub const LUA_GCSTEP = @as(c_int, 5);
-pub const LUA_GCSETPAUSE = @as(c_int, 6);
-pub const LUA_GCSETSTEPMUL = @as(c_int, 7);
-pub const LUA_GCISRUNNING = @as(c_int, 9);
-pub const LUA_GCGEN = @as(c_int, 10);
-pub const LUA_GCINC = @as(c_int, 11);
+pub const LUA_GCSTOP = 0;
+pub const LUA_GCRESTART = 1;
+pub const LUA_GCCOLLECT = 2;
+pub const LUA_GCCOUNT = 3;
+pub const LUA_GCCOUNTB = 4;
+pub const LUA_GCSTEP = 5;
+pub const LUA_GCSETPAUSE = 6;
+pub const LUA_GCSETSTEPMUL = 7;
+pub const LUA_GCISRUNNING = 9;
+pub const LUA_GCGEN = 10;
+pub const LUA_GCINC = 11;
 pub inline fn lua_getextraspace(L: ?*c.lua_State) ?*anyopaque {
     return std.zig.c_translation.cast(?*anyopaque, std.zig.c_translation.cast([*c]u8, L) - LUA_EXTRASPACE);
 }
@@ -234,25 +231,25 @@ pub inline fn lua_pushcfunction(L: *c.lua_State, f: c.lua_CFunction) void {
     return c.lua_pushcclosure(L, f, 0);
 }
 pub inline fn lua_isfunction(L: ?*c.lua_State, n: c_int) bool {
-    return c.lua_type(L, n) == LUA_TFUNCTION;
+    return c.lua_type(L, n) == c.LUA_TFUNCTION;
 }
 pub inline fn lua_istable(L: ?*c.lua_State, n: c_int) bool {
-    return c.lua_type(L, n) == LUA_TTABLE;
+    return c.lua_type(L, n) == c.LUA_TTABLE;
 }
 pub inline fn lua_islightuserdata(L: ?*c.lua_State, n: c_int) bool {
-    return c.lua_type(L, n) == LUA_TLIGHTUSERDATA;
+    return c.lua_type(L, n) == c.LUA_TLIGHTUSERDATA;
 }
 pub inline fn lua_isnil(L: ?*c.lua_State, n: c_int) bool {
-    return c.lua_type(L, n) == LUA_TNIL;
+    return c.lua_type(L, n) == c.LUA_TNIL;
 }
 pub inline fn lua_isboolean(L: ?*c.lua_State, n: c_int) bool {
-    return c.lua_type(L, n) == LUA_TBOOLEAN;
+    return c.lua_type(L, n) == c.LUA_TBOOLEAN;
 }
 pub inline fn lua_isthread(L: ?*c.lua_State, n: c_int) bool {
-    return c.lua_type(L, n) == LUA_TTHREAD;
+    return c.lua_type(L, n) == c.LUA_TTHREAD;
 }
 pub inline fn lua_isnone(L: ?*c.lua_State, n: c_int) bool {
-    return c.lua_type(L, n) == LUA_TNONE;
+    return c.lua_type(L, n) == c.LUA_TNONE;
 }
 pub inline fn lua_isnoneornil(L: ?*c.lua_State, n: c_int) bool {
     return c.lua_type(L, n) <= 0;
@@ -261,7 +258,7 @@ pub inline fn lua_pushliteral(L: ?*c.lua_State, s: [*c]const u8) [*c]const u8 {
     return c.lua_pushstring(L, s);
 }
 pub inline fn lua_pushglobaltable(L: ?*c.lua_State) anyopaque {
-    return std.zig.c_translation.cast(anyopaque, c.lua_rawgeti(L, LUA_REGISTRYINDEX, LUA_RIDX_GLOBALS));
+    return std.zig.c_translation.cast(anyopaque, c.lua_rawgeti(L, LUA_REGISTRYINDEX, c.LUA_RIDX_GLOBALS));
 }
 pub inline fn lua_tostring(L: ?*c.lua_State, i: c_int) @TypeOf(c.lua_tolstring(L, i, null)) {
     return c.lua_tolstring(L, i, null);
@@ -283,27 +280,22 @@ pub inline fn lua_getuservalue(L: ?*c.lua_State, idx: c_int) c_int {
 pub inline fn lua_setuservalue(L: ?*c.lua_State, idx: c_int) c_int {
     return c.lua_setiuservalue(L, idx, 1);
 }
-pub const LUA_NUMTAGS = LUA_NUMTYPES;
-pub const LUA_HOOKCALL = @as(c_int, 0);
-pub const LUA_HOOKRET = @as(c_int, 1);
-pub const LUA_HOOKLINE = @as(c_int, 2);
-pub const LUA_HOOKCOUNT = @as(c_int, 3);
-pub const LUA_HOOKTAILCALL = @as(c_int, 4);
-pub const LUA_MASKCALL = @as(c_int, 1) << LUA_HOOKCALL;
-pub const LUA_MASKRET = @as(c_int, 1) << LUA_HOOKRET;
-pub const LUA_MASKLINE = @as(c_int, 1) << LUA_HOOKLINE;
-pub const LUA_MASKCOUNT = @as(c_int, 1) << LUA_HOOKCOUNT;
+pub const LUA_NUMTAGS = c.LUA_NUMTYPES;
+pub const LUA_HOOKCALL = 0;
+pub const LUA_HOOKRET = 1;
+pub const LUA_HOOKLINE = 2;
+pub const LUA_HOOKCOUNT = 3;
+pub const LUA_HOOKTAILCALL = 4;
+pub const LUA_MASKCALL = 1 << LUA_HOOKCALL;
+pub const LUA_MASKRET = 1 << LUA_HOOKRET;
+pub const LUA_MASKLINE = 1 << LUA_HOOKLINE;
+pub const LUA_MASKCOUNT = 1 << LUA_HOOKCOUNT;
 pub const LUA_GNAME = "_G";
-pub const LUA_ERRFILE = LUA_ERRERR + @as(c_int, 1);
 pub const LUA_LOADED_TABLE = "_LOADED";
 pub const LUA_PRELOAD_TABLE = "_PRELOAD";
-pub const LUAL_NUMSIZES = (std.zig.c_translation.sizeof(c.lua_Integer) * @as(c_int, 16)) + std.zig.c_translation.sizeof(c.lua_Number);
-pub inline fn luaL_checkversion(L: ?*c.lua_State) @TypeOf(c.luaL_checkversion_(L, LUA_VERSION_NUM, LUAL_NUMSIZES)) {
-    _ = &L;
-    return c.luaL_checkversion_(L, LUA_VERSION_NUM, LUAL_NUMSIZES);
-}
-pub const LUA_NOREF = -@as(c_int, 2);
-pub const LUA_REFNIL = -@as(c_int, 1);
+pub const LUAL_NUMSIZES = (std.zig.c_translation.sizeof(c.lua_Integer) * 16) + std.zig.c_translation.sizeof(c.lua_Number);
+pub const LUA_NOREF = -2;
+pub const LUA_REFNIL = -1;
 pub inline fn luaL_loadfile(L: ?*c.lua_State, f: [*c]const u8) @TypeOf(c.luaL_loadfilex(L, f, null)) {
     return c.luaL_loadfilex(L, f, null);
 }
@@ -329,10 +321,10 @@ pub inline fn luaL_typename(L: ?*c.lua_State, i: c_int) [*c]const u8 {
     return c.lua_typename(L, c.lua_type(L, i));
 }
 pub inline fn luaL_dofile(L: ?*c.lua_State, @"fn": c_int) bool {
-    return (luaL_loadfile(L, @"fn") != 0) or (lua_pcall(L, @as(c_int, 0), LUA_MULTRET, @as(c_int, 0)) != 0);
+    return (luaL_loadfile(L, @"fn") != 0) or (lua_pcall(L, 0, LUA_MULTRET, 0) != 0);
 }
 pub inline fn luaL_dostring(L: ?*c.lua_State, s: [*c]const u8) bool {
-    return (c.luaL_loadstring(L, s) != 0) or (lua_pcall(L, @as(c_int, 0), LUA_MULTRET, @as(c_int, 0)) != 0);
+    return (c.luaL_loadstring(L, s) != 0) or (lua_pcall(L, 0, LUA_MULTRET, 0) != 0);
 }
 pub inline fn luaL_getmetatable(L: ?*c.lua_State, n: [*c]const u8) c_int {
     return c.lua_getfield(L, LUA_REGISTRYINDEX, n);
@@ -374,7 +366,7 @@ pub inline fn lua_writestring(s: anytype, l: anytype) @TypeOf(fwrite(s, std.zig.
     return fwrite(s, std.zig.c_translation.sizeof(u8), l, stdout);
 }
 pub inline fn lua_writeline() c_int {
-    _ = lua_writestring("\n", @as(c_int, 1));
+    _ = lua_writestring("\n", 1);
     return fflush(stdout);
 }
 pub inline fn lua_writestringerror(s: anytype, p: anytype) c_int {
@@ -413,7 +405,7 @@ pub inline fn registerFn(s: *c.lua_State, n: [:0]const u8, f: c.lua_CFunction) v
     _ = lua_pushcfunction(s, f);
     return c.lua_setglobal(s, n);
 }
-pub inline fn pop(L: ?*c.lua_State, n: c_int) void {
+pub inline fn pop(L: *c.lua_State, n: c_int) void {
     return c.lua_settop(L, -n - 1);
 }
 pub inline fn pushNil(s: *c.lua_State) void {
@@ -467,7 +459,7 @@ pub inline fn toBool(s: *c.lua_State, idx: c_int) bool {
     return c.lua_toboolean(s, idx) != 0;
 }
 
-pub inline fn toPointer(s: *c.lua_State, comptime T: type, idx: c_int) LuaError!*T {
+pub inline fn toPointer(s: *c.lua_State, comptime T: type, idx: c_int) LuaError!*const T {
     return @ptrCast(@alignCast(c.lua_topointer(s, idx) orelse {
         return LuaError.PointerNull;
     }));
@@ -480,25 +472,53 @@ pub inline fn toPointer(s: *c.lua_State, comptime T: type, idx: c_int) LuaError!
 pub fn printStack(s: *c.lua_State) void {
     const top = c.lua_gettop(s);
     if (top == 0) log.info("Stack empty", .{});
-    for (1..@intCast(top)) |i| {
-        const tyname = std.mem.sliceTo(c.lua_typename(s, c.lua_type(s, -2)), 0);
-        log.info("[{d: >3}] {s}", .{ i, tyname });
+    log.info("stack:", .{});
+    for (1..@intCast(top + 2)) |i| {
+        const tyname = std.mem.sliceTo(c.lua_typename(s, c.lua_type(s, @intCast(i))), 0);
+        log.info("\t[{d: >3}] {s} -> {s}", .{
+            i,
+            tyname,
+            toValue(s, []const u8, @intCast(i)) catch "<>",
+        });
     }
 }
 pub fn pushValue(s: *c.lua_State, v: anytype) LuaError!void {
     const ti = @typeInfo(@TypeOf(v));
 
     switch (ti) {
-        .Null => pushNil(s),
-        .Bool => pushBool(s, v),
-        .Int => pushInteger(s, @as(c.lua_Integer, v)),
-        .Float => pushNumber(s, @as(c.lua_Number, v)),
-        .Array => std.debug.panic("Arrays are currently unsupported", .{}),
-        .Struct => std.debug.panic("Structs are currently unsupported", .{}),
-        .Optional => std.debug.panic("Optionals are currently unsupported", .{}),
-        .Enum => std.debug.panic("Enums are currently unsupported", .{}),
-        .Union => std.debug.panic("Unions are currently unsupported", .{}),
-        .Pointer => pushLightUserdata(s, v),
+        inline .Void => {},
+        inline .Null => pushNil(s),
+        inline .Bool => pushBool(s, v),
+        inline .Int => {
+            if (v > std.math.maxInt(@TypeOf(v)) or
+                v < std.math.minInt(@TypeOf(v)))
+            {
+                return LuaError.Conversion;
+            }
+            pushInteger(s, @intCast(v));
+        },
+        inline .Float => pushNumber(s, @floatCast(v)),
+        inline .Array => std.debug.panic("Arrays are currently unsupported", .{}),
+        inline .Struct => std.debug.panic("Structs are currently unsupported", .{}),
+        inline .Optional => std.debug.panic("Optionals are currently unsupported", .{}),
+        inline .Enum => std.debug.panic("Enums are currently unsupported", .{}),
+        inline .Union => std.debug.panic("Unions are currently unsupported", .{}),
+        inline .Pointer => |ptr_ti| {
+            switch (ptr_ti.size) {
+                inline .Slice => {
+                    const child_ti = @typeInfo(ptr_ti.child);
+                    if (child_ti == .Int and
+                        child_ti.Int.bits == 8 and
+                        child_ti.Int.signedness == .unsigned)
+                    {
+                        return try pushString(s, v);
+                    } else {
+                        return pushLightUserdata(s, v);
+                    }
+                },
+                else => pushLightUserdata(s, v),
+            }
+        },
         else => @compileError("Unsupported type " ++ @typeName(@TypeOf(v))),
     }
 }
@@ -507,16 +527,33 @@ pub fn toValue(s: *c.lua_State, comptime T: type, idx: c_int) LuaError!T {
     const ti = @typeInfo(T);
 
     switch (ti) {
-        .Null => return null,
-        .Bool => return toBool(s, idx),
-        .Int => return toInteger(s, idx),
-        .Float => return toNumber(s, idx),
-        .Array => std.debug.panic("Arrays are currently unsupported", .{}),
-        .Struct => std.debug.panic("Structs are currently unsupported", .{}),
-        .Optional => std.debug.panic("Optionals are currently unsupported", .{}),
-        .Enum => std.debug.panic("Enums are currently unsupported", .{}),
-        .Union => std.debug.panic("Unions are currently unsupported", .{}),
-        .Pointer => return toPointer(s, T, idx),
+        inline .Void => return,
+        inline .Null => return null,
+        inline .Bool => return toBool(s, idx),
+        inline .Int => return toInteger(s, idx),
+        inline .Float => return toNumber(s, idx),
+        inline .Array => std.debug.panic("Arrays are currently unsupported", .{}),
+        inline .Struct => std.debug.panic("Structs are currently unsupported", .{}),
+        inline .Optional => std.debug.panic("Optionals are currently unsupported", .{}),
+        inline .Enum => std.debug.panic("Enums are currently unsupported", .{}),
+        inline .Union => std.debug.panic("Unions are currently unsupported", .{}),
+        inline .Pointer => |ptr_ti| {
+            comptime if (!ptr_ti.is_const) @compileError("Pointer has to be constant");
+            switch (ptr_ti.size) {
+                inline .Slice => {
+                    const child_ti = @typeInfo(ptr_ti.child);
+                    if (child_ti == .Int and
+                        child_ti.Int.bits == 8 and
+                        child_ti.Int.signedness == .unsigned)
+                    {
+                        return try toString(s, idx);
+                    } else {
+                        return toPointer(s, ptr_ti.child, idx);
+                    }
+                },
+                else => return toPointer(s, ptr_ti.child, idx),
+            }
+        },
         else => @compileError("Unsupported type " ++ @typeName(T)),
     }
 }
