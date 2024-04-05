@@ -14,6 +14,8 @@ pub const LuaError = error{
     NotExecutable,
     UnexpectedType,
     PointerNull,
+    UDCreation,
+    NoUserdata,
 };
 
 //const __builtin_expect = std.zig.c_builtins.__builtin_expect;
@@ -361,8 +363,18 @@ pub inline fn pushBool(s: *c.lua_State, b: bool) void {
     c.lua_pushboolean(s, @intFromBool(b));
 }
 
+pub inline fn pushUserdata(s: *c.lua_State, d: anytype) LuaError!void {
+    const ptr = c.lua_newuserdatauv(s, @sizeOf(@TypeOf(d)), 1) orelse return LuaError.UDCreation;
+    @memcpy(@as(*@TypeOf(d), ptr), &d);
+}
 pub inline fn pushLightUserdata(s: *c.lua_State, ptr: anytype) void {
-    if (@typeInfo(@TypeOf(ptr)) != .Pointer) @compileError("Light userdata has to be a pointer");
+    const ptr_ti = @typeInfo(@TypeOf(ptr));
+    if (ptr_ti != .Pointer) @compileError("Light userdata has to be a pointer");
+    switch (ptr_ti.Pointer.size) {
+        .Slice => @compileError("Light userdata has to be an actual pointer"),
+        .C, .One, .Many => {},
+    }
+    if (ptr_ti.Pointer.is_const) @compileError("Light userdata has to be a nont-const-pointer");
     c.lua_pushlightuserdata(s, @ptrCast(ptr));
 }
 
@@ -401,10 +413,11 @@ pub inline fn toPointer(s: *c.lua_State, comptime T: type, idx: c_int) LuaError!
         return LuaError.PointerNull;
     }));
 }
-//pub extern fn lua_tocfunction(L: ?*lua_State, idx: c_int) lua_CFunction;
-//pub extern fn lua_touserdata(L: ?*lua_State, idx: c_int) ?*anyopaque;
+pub inline fn toUserdata(s: *c.lua_State, comptime T: type, idx: c_int) LuaError!*T {
+    const ptr = c.lua_touserdata(s, idx) orelse LuaError.NoUserdata;
+    return @ptrCast(@alignCast(ptr));
+}
 //pub extern fn lua_tothread(L: ?*lua_State, idx: c_int) ?*lua_State;
-//pub extern fn lua_topointer(L: ?*lua_State, idx: c_int) ?*const anyopaque;
 
 pub fn printStack(s: *c.lua_State) void {
     const top = c.lua_gettop(s);
@@ -435,11 +448,7 @@ pub fn pushValue(s: *c.lua_State, v: anytype) LuaError!void {
             pushInteger(s, @intCast(v));
         },
         inline .Float => pushNumber(s, @floatCast(v)),
-        inline .Array => std.debug.panic("Arrays are currently unsupported", .{}),
-        inline .Struct => std.debug.panic("Structs are currently unsupported", .{}),
-        inline .Optional => std.debug.panic("Optionals are currently unsupported", .{}),
-        inline .Enum => std.debug.panic("Enums are currently unsupported", .{}),
-        inline .Union => std.debug.panic("Unions are currently unsupported", .{}),
+        inline .Array, .Struct, .Optional, .Enum, .Union => std.debug.panic("Unsupported Type for values", .{}),
         inline .Pointer => |ptr_ti| {
             switch (ptr_ti.size) {
                 inline .Slice => {
@@ -448,10 +457,11 @@ pub fn pushValue(s: *c.lua_State, v: anytype) LuaError!void {
                         child_ti.Int.bits == 8 and
                         child_ti.Int.signedness == .unsigned)
                     {
-                        return try pushString(s, v);
+                        try pushString(s, v);
                     } else {
-                        return pushLightUserdata(s, v);
+                        pushLightUserdata(s, v);
                     }
+                    return;
                 },
                 else => pushLightUserdata(s, v),
             }

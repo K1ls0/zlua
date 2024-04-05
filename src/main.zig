@@ -31,7 +31,7 @@ pub fn main() !void {
         try state.load(f.reader(), allocator, null);
     }
     log.info("code eval", .{});
-    _ = try state.callFn(.{}, void, .{});
+    try state.callFn(.{}, void, .none);
 
     try state.registerFn("Mul2", mul2);
 
@@ -39,17 +39,17 @@ pub fn main() !void {
     const r = try state.callFn(.{
         @as(f64, 10),
         @as(f64, 2),
-    }, f64, .{ .name = .{ .global = "Mul" } });
+    }, f64, .{ .global = "Mul" });
     log.info("Got out {d}", .{r});
 
     log.info("Mul2 func", .{});
     const r2 = try state.callFn(.{
         @as(f64, 10),
         @as(f64, 2),
-    }, f64, .{ .name = .{ .global = "Mul2" } });
+    }, f64, .{ .global = "Mul2" });
     log.info("Got out {d}", .{r2});
 
-    _ = try state.callFn(.{}, void, .{ .name = .{ .global = "Main" } });
+    try state.callFn(.{}, void, .{ .global = "Main" });
 }
 
 fn mul2(a: f64, b: f64) f64 {

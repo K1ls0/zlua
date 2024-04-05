@@ -131,21 +131,15 @@ pub fn State(comptime UD: type) type {
             }
         }
 
-        pub const CallFnOptions = struct {
-            /// what kind of function to call
-            name: FnName = .none,
-            /// Call using protected call (pcall), otherwise unprotected (non-validating call)
-            safe: bool = true,
-        };
         pub fn callFn(
             self: *Self,
             args: anytype,
             comptime Retval: type,
-            options: CallFnOptions,
+            name: FnName,
         ) LuaError!Retval {
             const state = self.state;
 
-            switch (options.name) {
+            switch (name) {
                 .none => {}, // Assume the function is on the stack already
                 .global => |s| {
                     const glob_type = c.lua_getglobal(state, s.ptr);
