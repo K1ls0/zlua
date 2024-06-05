@@ -17,7 +17,7 @@ pub fn main() !void {
     var lua_alloc = std.heap.GeneralPurposeAllocator(.{ .safety = false }){};
     defer std.debug.assert(lua_alloc.deinit() == .ok);
 
-    var state = try zlua.State(void).init(
+    var state = try zlua.State().init(
         lua_alloc.allocator(),
         .{
             .lib = zlua.StdLib.all(),
@@ -31,25 +31,25 @@ pub fn main() !void {
         try state.load(f.reader(), allocator, null);
     }
     log.info("code eval", .{});
-    try state.callFn(.{}, void, .none);
+    try state.callFn(null, .{}, void);
 
     try state.registerFn("Mul2", mul2);
 
     log.info("Mul func", .{});
-    const r = try state.callFn(.{
+    const r = try state.callFn("Mul", .{
         @as(f64, 10),
         @as(f64, 2),
-    }, f64, .{ .global = "Mul" });
+    }, f64);
     log.info("Got out {d}", .{r});
 
     log.info("Mul2 func", .{});
-    const r2 = try state.callFn(.{
+    const r2 = try state.callFn("Mul2", .{
         @as(f64, 10),
         @as(f64, 2),
-    }, f64, .{ .global = "Mul2" });
+    }, f64);
     log.info("Got out {d}", .{r2});
 
-    try state.callFn(.{}, void, .{ .global = "Main" });
+    try state.callFn("Main", .{}, void);
 }
 
 fn mul2(a: f64, b: f64) f64 {

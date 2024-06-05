@@ -12,8 +12,7 @@ pub const LuaError = util.LuaError;
 
 pub const StdLib = cfg.StdLib;
 
-pub fn State(comptime UD: type) type {
-    _ = UD; // autofix
+pub fn State() type {
     return struct {
         const Self = @This();
 
@@ -62,11 +61,10 @@ pub fn State(comptime UD: type) type {
             alloc.destroy(self.ud);
         }
 
-        /// Load a chunk of code/data into the lua vm.
-        /// If name is set, store the resulting thread/function
-        /// in a global variable with that name.
-        /// If `name` parameter is null, the resulting thread
-        /// is only being pushed onto the stack. Otherwise it's being
+        /// Load a chunk of code/data into the lua vm. If name is set, store
+        /// the resulting thread/function in a global variable with that name.
+        /// If `name` parameter is null, the resulting thread is only being
+        /// pushed onto the stack.
         pub fn load(
             self: *Self,
             reader: anytype,
@@ -131,23 +129,25 @@ pub fn State(comptime UD: type) type {
             }
         }
 
+        /// Call a lua function given the arguments an optional name and a
+        /// comptime return value. The return value will be inferred from the
+        /// VM. If the returned value from the lua function can not be cast
+        /// into the target value, an error is returned.
         pub fn callFn(
             self: *Self,
+            name: FnName,
             args: anytype,
             comptime Retval: type,
-            name: FnName,
         ) LuaError!Retval {
             const state = self.state;
 
-            switch (name) {
-                .none => {}, // Assume the function is on the stack already
-                .global => |s| {
-                    const glob_type = c.lua_getglobal(state, s.ptr);
-                    switch (glob_type) {
-                        c.LUA_TTHREAD, c.LUA_TFUNCTION => {},
-                        else => return LuaError.NotExecutable,
-                    }
-                },
+            // If no name was given, use the top value from the Lua VM stack.
+            if (name) |s| {
+                const glob_type = c.lua_getglobal(state, s.ptr);
+                switch (glob_type) {
+                    c.LUA_TTHREAD, c.LUA_TFUNCTION => {},
+                    else => return LuaError.NotExecutable,
+                }
             }
 
             const args_ti = @typeInfo(@TypeOf(args));
@@ -192,6 +192,7 @@ pub fn State(comptime UD: type) type {
             }
         }
 
+        /// register a new function under a given name inside the lua vm
         pub fn registerFn(self: *Self, name: ?[:0]const u8, func: anytype) LuaError!void {
             const CFunc = struct {
                 inline fn cclosureInner(s: *c.lua_State) LuaError!c_int {
@@ -278,6 +279,8 @@ pub fn State(comptime UD: type) type {
             }
         }
 
+        /// Wrapper function for the allocation function for the lua VM. It
+        /// allows utilizing any zig allocator for the LUA VM.
         fn allocFn(
             ud: ?*anyopaque,
             ptr: ?*anyopaque,
@@ -319,9 +322,9 @@ pub fn State(comptime UD: type) type {
                 }
             };
 
-            const userdata = @as(*mem.Allocator, @ptrCast(@alignCast(ud orelse {
+            const userdata: *mem.Allocator = @ptrCast(@alignCast(ud orelse {
                 panic("lua alloc fn userdata is zero, but is expected to be set!", .{});
-            })));
+            }));
 
             return ZAlloc.alloc(userdata, ptr, osize, nsize) catch |e| {
                 log.err("Error while allocating memory for lua vm: {}", .{e});
@@ -340,12 +343,7 @@ fn luaPanicReport(s: ?*c.lua_State) callconv(.C) c_int {
     return 0;
 }
 
-pub const FnName = union(enum) {
-    /// No function name (function ref taken from stack directly)
-    none,
-    /// global function name
-    global: [:0]const u8,
-};
+pub const FnName = ?[:0]const u8;
 
 fn checkLuaCFunction(comptime T: anytype) void {
     const ti = @typeInfo(T);
