@@ -4,18 +4,15 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const lib = b.addStaticLibrary(.{
-        .name = "zlua",
+    const lib = b.addModule("zlua", .{
         .root_source_file = b.path("src/root.zig"),
         .target = target,
         .optimize = optimize,
     });
 
-    b.installArtifact(lib);
-
     // Add lua files
     {
-        lib.linkLibC();
+        lib.link_libc = true;
         lib.addIncludePath(b.path(lib_files_dir));
         inline for (c_files) |cfile| {
             lib.addCSourceFile(.{
@@ -31,8 +28,7 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    exe.step.dependOn(&lib.step);
-    exe.root_module.addImport("zlua", &lib.root_module);
+    exe.root_module.addImport("zlua", lib);
 
     b.installArtifact(exe);
 
