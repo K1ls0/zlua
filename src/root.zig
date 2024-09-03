@@ -6,7 +6,7 @@ const assert = std.debug.assert;
 const panic = std.debug.panic;
 
 const c = @import("lua_c.zig");
-const cfg = @import("config.zig");
+pub const cfg = @import("config.zig");
 pub const util = @import("lua_util.zig");
 pub const LuaError = util.LuaError;
 
