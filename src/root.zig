@@ -151,13 +151,14 @@ pub fn State() type {
             }
 
             const args_ti = @typeInfo(@TypeOf(args));
-            inline for (args_ti.Struct.fields) |field| {
+
+            inline for (args_ti.@"struct".fields) |field| {
                 try util.pushValue(state, @field(args, field.name));
             }
 
-            const params_count = args_ti.Struct.fields.len;
+            const params_count = args_ti.@"struct".fields.len;
             const retval_count = switch (@typeInfo(Retval)) {
-                inline .Struct => |struct_ti| struct_ti.fields.len,
+                inline .@"struct" => |struct_ti| struct_ti.fields.len,
                 else => 1,
             };
 
@@ -176,7 +177,7 @@ pub fn State() type {
 
             const ret_ti = @typeInfo(Retval);
             switch (ret_ti) {
-                inline .Struct => |struct_ti| {
+                inline .@"struct" => |struct_ti| {
                     var r: Retval = undefined;
                     inline for (struct_ti.fields) |field| {
                         @field(r, field.name) = try util.toValue(field.type);
@@ -197,12 +198,12 @@ pub fn State() type {
             const CFunc = struct {
                 inline fn cclosureInner(s: *c.lua_State) LuaError!c_int {
                     const fn_ti = switch (@typeInfo(@TypeOf(func))) {
-                        inline .Fn => |fn_ti| fn_ti,
+                        inline .@"fn" => |fn_ti| fn_ti,
                         else => @compileError("Only functions may be registered by this function."),
                     };
 
                     const ArgsTi = std.builtin.Type{
-                        .Struct = std.builtin.Type.Struct{
+                        .@"struct" = std.builtin.Type.Struct{
                             .layout = .auto,
                             .is_tuple = true,
                             .fields = &blk: {
@@ -235,7 +236,7 @@ pub fn State() type {
                     const ret_ti = @typeInfo(fn_ti.return_type orelse @compileError("Function has to have return type"));
                     var ret_values: c_int = 0;
                     switch (ret_ti) {
-                        inline .ErrorUnion => |eunion_ti| switch (@typeInfo(eunion_ti.payload)) {
+                        inline .error_union => |eunion_ti| switch (@typeInfo(eunion_ti.payload)) {
                             inline .Struct => |struct_ti| {
                                 const r_noerr = try r;
                                 inline for (struct_ti.fields) |field| {
@@ -249,7 +250,7 @@ pub fn State() type {
                                 try util.pushValue(s, r);
                             },
                         },
-                        inline .Struct => |struct_ti| {
+                        inline .@"struct" => |struct_ti| {
                             inline for (struct_ti.fields) |field| {
                                 ret_values += 1;
                                 try util.pushValue(s, @field(r, field.name));

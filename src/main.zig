@@ -30,6 +30,7 @@ pub fn main() !void {
         defer f.close();
         try state.load(f.reader(), allocator, null);
     }
+
     log.info("code eval", .{});
     try state.callFn(null, .{}, void);
 

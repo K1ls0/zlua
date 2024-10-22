@@ -436,10 +436,10 @@ pub fn pushValue(s: *c.lua_State, v: anytype) LuaError!void {
     const ti = @typeInfo(@TypeOf(v));
 
     switch (ti) {
-        inline .Void => {},
-        inline .Null => pushNil(s),
-        inline .Bool => pushBool(s, v),
-        inline .Int => {
+        inline .void => {},
+        inline .null => pushNil(s),
+        inline .bool => pushBool(s, v),
+        inline .int => {
             if (v > std.math.maxInt(@TypeOf(v)) or
                 v < std.math.minInt(@TypeOf(v)))
             {
@@ -447,9 +447,9 @@ pub fn pushValue(s: *c.lua_State, v: anytype) LuaError!void {
             }
             pushInteger(s, @intCast(v));
         },
-        inline .Float => pushNumber(s, @floatCast(v)),
-        inline .Array, .Struct, .Optional, .Enum, .Union => std.debug.panic("Unsupported Type for values", .{}),
-        inline .Pointer => |ptr_ti| {
+        inline .float => pushNumber(s, @floatCast(v)),
+        inline .array, .@"struct", .optional, .@"enum", .@"union" => std.debug.panic("Unsupported Type for values", .{}),
+        inline .pointer => |ptr_ti| {
             switch (ptr_ti.size) {
                 inline .Slice => {
                     const child_ti = @typeInfo(ptr_ti.child);
@@ -474,17 +474,17 @@ pub fn toValue(s: *c.lua_State, comptime T: type, idx: c_int) LuaError!T {
     const ti = @typeInfo(T);
 
     switch (ti) {
-        inline .Void => return,
-        inline .Null => return null,
-        inline .Bool => return toBool(s, idx),
-        inline .Int => return toInteger(s, idx),
-        inline .Float => return toNumber(s, idx),
-        inline .Array => std.debug.panic("Arrays are currently unsupported", .{}),
-        inline .Struct => std.debug.panic("Structs are currently unsupported", .{}),
-        inline .Optional => std.debug.panic("Optionals are currently unsupported", .{}),
-        inline .Enum => std.debug.panic("Enums are currently unsupported", .{}),
-        inline .Union => std.debug.panic("Unions are currently unsupported", .{}),
-        inline .Pointer => |ptr_ti| {
+        inline .void => return,
+        inline .null => return null,
+        inline .bool => return toBool(s, idx),
+        inline .int => return toInteger(s, idx),
+        inline .float => return toNumber(s, idx),
+        inline .array => std.debug.panic("Arrays are currently unsupported", .{}),
+        inline .@"struct" => std.debug.panic("Structs are currently unsupported", .{}),
+        inline .optional => std.debug.panic("Optionals are currently unsupported", .{}),
+        inline .@"enum" => std.debug.panic("Enums are currently unsupported", .{}),
+        inline .@"union" => std.debug.panic("Unions are currently unsupported", .{}),
+        inline .pointer => |ptr_ti| {
             comptime if (!ptr_ti.is_const) @compileError("Pointer has to be constant");
             switch (ptr_ti.size) {
                 inline .Slice => {
