@@ -255,12 +255,6 @@ pub inline fn lua_replace(L: ?*c.lua_State, idx: c_int) void {
     _ = c.lua_copy(L, -1, idx);
     return pop(L, 1);
 }
-pub inline fn lua_getuservalue(L: ?*c.lua_State, idx: c_int) c_int {
-    return c.lua_getiuservalue(L, idx, 1);
-}
-pub inline fn lua_setuservalue(L: ?*c.lua_State, idx: c_int) c_int {
-    return c.lua_setiuservalue(L, idx, 1);
-}
 pub const LUA_NUMTAGS = c.LUA_NUMTYPES;
 pub const LUA_HOOKCALL = 0;
 pub const LUA_HOOKRET = 1;

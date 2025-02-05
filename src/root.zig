@@ -213,7 +213,7 @@ pub fn State() type {
                                     fields[i] = std.builtin.Type.StructField{
                                         .name = std.fmt.comptimePrint("{d}", .{i}),
                                         .type = Ty,
-                                        .default_value = null,
+                                        .default_value_ptr = null,
                                         .is_comptime = false,
                                         .alignment = @alignOf(Ty),
                                     };
@@ -332,6 +332,36 @@ pub fn State() type {
                 return null;
             };
         }
+
+        //pub fn allocFn2(
+        //    ud: ?*anyopaque,
+        //    ptr: ?*anyopaque,
+        //    osize: usize,
+        //    nsize: usize,
+        //) callconv(.C) ?*anyopaque {
+        //    const c_alignment = 16;
+        //    const allocator: *const std.mem.Allocator = @ptrCast(@alignCast(ud));
+        //    const aligned_ptr: ?[*]align(c_alignment) u8 = @ptrCast(@alignCast(ptr));
+        //    if (aligned_ptr) |previous_pointer| {
+        //        const previous_slice = previous_pointer[0..osize];
+        //        if (allocator.realloc(previous_slice, nsize)) |new_slice| {
+        //            return new_slice.ptr;
+        //        } else |_| {
+        //            if (osize >= nsize) {
+        //                // Lua assumes that the allocator never fails when osize >= nsize.
+        //                // We could lie and say that `previous_slice.ptr` is still correct
+        //                // However then osize will be incorrect, which means the next shrink/grow would lie to the allocator implementation
+        //                @panic("unable to shrink");
+        //            }
+        //            return null;
+        //        }
+        //    } else {
+        //        // osize is any of LUA_TSTRING, LUA_TTABLE, LUA_TFUNCTION, LUA_TUSERDATA, or LUA_TTHREAD
+        //        // when (and only when) Lua is creating a new object of that type.
+        //        // When osize is some other value, Lua is allocating memory for something else.
+        //        return (allocator.alignedAlloc(u8, c_alignment, nsize) catch return null).ptr;
+        //    }
+        //}
     };
 }
 
