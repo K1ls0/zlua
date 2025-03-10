@@ -1,8 +1,19 @@
 const std = @import("std");
+const builtin = @import("builtin");
 const log = std.log;
 const zlua = @import("zlua");
 
 const FILENAME: []const u8 = "./test.lua";
+
+var debug_allocator: std.heap.DebugAllocator(.{ .safety = true }) = .init;
+
+const allocator = if (builtin.mode == .Debug or builtin.mode == .ReleaseSafe) debug_allocator.allocator() else std.heap.smp_allocator;
+
+fn deinitAllocator() void {
+    if (comptime builtin.mode == .Debug or builtin.mode == .ReleaseSafe) {
+        std.debug.assert(debug_allocator.deinit() == .ok);
+    }
+}
 
 pub const Error = error{
     LoadCode,
@@ -10,9 +21,7 @@ pub const Error = error{
 };
 
 pub fn main() !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{ .safety = true }){};
-    defer std.debug.assert(gpa.deinit() == .ok);
-    const allocator = gpa.allocator();
+    defer deinitAllocator();
 
     var lua_alloc = std.heap.GeneralPurposeAllocator(.{ .safety = false }){};
     defer std.debug.assert(lua_alloc.deinit() == .ok);

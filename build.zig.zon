@@ -1,5 +1,6 @@
 .{
-    .name = "zlua",
+    .name = .zlua,
+    .fingerprint = 0xcf671dd3c14cadf,
     .version = "0.1.0",
     .dependencies = .{
         .luac = .{
