@@ -23,11 +23,8 @@ pub const Error = error{
 pub fn main() !void {
     defer deinitAllocator();
 
-    var lua_alloc = std.heap.GeneralPurposeAllocator(.{ .safety = false }){};
-    defer std.debug.assert(lua_alloc.deinit() == .ok);
-
     var state = try zlua.State().init(
-        lua_alloc.allocator(),
+        allocator,
         .{
             .lib = zlua.StdLib.all(),
         },
