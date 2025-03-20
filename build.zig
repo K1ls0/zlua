@@ -66,7 +66,11 @@ pub fn build(b: *std.Build) void {
         .root_module = exe_mod,
     });
     exe.step.dependOn(&lib.step);
+<<<<<<< main
 
+=======
+    exe.root_module.addImport("zlua", lib.root_module);
+>>>>>>> Upgrade build to 0.14.0
     b.installArtifact(exe);
     const run_cmd = b.addRunArtifact(exe);
 
