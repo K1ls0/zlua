@@ -5,7 +5,7 @@ const log = std.log;
 const assert = std.debug.assert;
 const panic = std.debug.panic;
 
-const c = @import("lua_c.zig");
+pub const c = @import("luac.zig");
 pub const cfg = @import("config.zig");
 pub const util = @import("lua_util.zig");
 pub const LuaError = util.LuaError;
@@ -67,8 +67,8 @@ pub fn State() type {
         /// pushed onto the stack.
         pub fn load(
             self: *Self,
-            reader: anytype,
             allocator: mem.Allocator,
+            reader: anytype,
             name: ?[:0]const u8,
         ) LuaError!void {
             const RTy = @TypeOf(reader);
@@ -83,7 +83,7 @@ pub fn State() type {
                     _: ?*c.lua_State,
                     datan: ?*anyopaque,
                     sizen: ?*usize,
-                ) callconv(.C) [*c]const u8 {
+                ) callconv(.c) [*c]const u8 {
                     const size = sizen orelse unreachable;
                     const data_self: *@This() = @ptrCast(@alignCast(datan orelse unreachable));
 
@@ -207,6 +207,7 @@ pub fn State() type {
                             .layout = .auto,
                             .is_tuple = true,
                             .fields = &blk: {
+                                // TODO: Add user context to function as default parameter
                                 comptime var fields: [fn_ti.params.len]std.builtin.Type.StructField = undefined;
                                 inline for (fn_ti.params, 0..) |param, i| {
                                     const Ty = param.type orelse @compileError("All function parameters must have types");
@@ -266,7 +267,7 @@ pub fn State() type {
                     return ret_values;
                 }
 
-                pub fn cclosure(s: ?*c.lua_State) callconv(.C) c_int {
+                pub fn cclosure(s: ?*c.lua_State) callconv(.c) c_int {
                     const state = s orelse unreachable;
                     const r = cclosureInner(state) catch |e| {
                         std.debug.panic("Error while executing c function: {}", .{e});
@@ -287,7 +288,7 @@ pub fn State() type {
             ptr: ?*anyopaque,
             osize: usize,
             nsize: usize,
-        ) callconv(.C) ?*anyopaque {
+        ) callconv(.c) ?*anyopaque {
             const ZAlloc = struct {
                 fn alloc(
                     allocator: *mem.Allocator,
@@ -338,7 +339,7 @@ pub fn State() type {
         //    ptr: ?*anyopaque,
         //    osize: usize,
         //    nsize: usize,
-        //) callconv(.C) ?*anyopaque {
+        //) callconv(.c) ?*anyopaque {
         //    const c_alignment = 16;
         //    const allocator: *const std.mem.Allocator = @ptrCast(@alignCast(ud));
         //    const aligned_ptr: ?[*]align(c_alignment) u8 = @ptrCast(@alignCast(ptr));
@@ -365,7 +366,7 @@ pub fn State() type {
     };
 }
 
-fn luaPanicReport(s: ?*c.lua_State) callconv(.C) c_int {
+fn luaPanicReport(s: ?*c.lua_State) callconv(.c) c_int {
     const cause = util.toString(s orelse return 1, -1) catch |e| {
         log.err("Error while converting to string: {}", .{e});
         return 2;

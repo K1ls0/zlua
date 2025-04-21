@@ -10,18 +10,16 @@ pub const StdLib = struct {
     debug: bool = false,
     package: bool = false,
 
-    pub fn all() @This() {
-        return .{
-            .base = true,
-            .coroutine = true,
-            .table = true,
-            .io = true,
-            .os = true,
-            .string = true,
-            .utf8 = true,
-            .math = true,
-            .debug = true,
-            .package = true,
-        };
-    }
+    pub const all = StdLib{
+        .base = true,
+        .coroutine = true,
+        .table = true,
+        .io = true,
+        .os = true,
+        .string = true,
+        .utf8 = true,
+        .math = true,
+        .debug = true,
+        .package = true,
+    };
 };

@@ -10,15 +10,15 @@ pub const Error = error{
 };
 
 pub fn main() !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{ .safety = true }){};
-    defer std.debug.assert(gpa.deinit() == .ok);
-    const allocator = gpa.allocator();
+    var debug_gpa = std.heap.DebugAllocator(.{ .safety = true }).init;
+    defer std.debug.assert(debug_gpa.deinit() == .ok);
+    const allocator = debug_gpa.allocator();
 
-    var lua_alloc = std.heap.GeneralPurposeAllocator(.{ .safety = false }){};
-    defer std.debug.assert(lua_alloc.deinit() == .ok);
+    var lua_debug_gpa = std.heap.DebugAllocator(.{ .safety = false }).init;
+    defer std.debug.assert(lua_debug_gpa.deinit() == .ok);
 
     var state = try zlua.State().init(
-        lua_alloc.allocator(),
+        lua_debug_gpa.allocator(),
         .{
             .lib = zlua.StdLib.all(),
         },

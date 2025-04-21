@@ -1,9 +1,5 @@
 .{
     .name = .zlua,
-<<<<<<< main
-    .fingerprint = 0xcf671dd3c14cadf,
-=======
->>>>>>> Upgrade build to 0.14.0
     .version = "0.1.0",
     .fingerprint = 0xcf671dd7b5cf1e3,
     .dependencies = .{

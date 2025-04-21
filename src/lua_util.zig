@@ -1,6 +1,6 @@
 const std = @import("std");
 const log = std.log;
-pub const c = @import("lua_c.zig");
+pub const c = @import("luac.zig");
 
 pub const LuaError = error{
     StateInit,
@@ -65,7 +65,7 @@ pub const LuaError = error{
 //    _unused2: [20]u8 = std.mem.zeroes([20]u8),
 //};
 
-pub const lua_Hook = ?*const fn (?*c.lua_State, [*c]c.lua_Debug) callconv(.C) void;
+pub const lua_Hook = ?*const fn (?*c.lua_State, [*c]c.lua_Debug) callconv(.c) void;
 pub const lua_ident: [*c]const u8 = @extern([*c]const u8, .{
     .name = "lua_ident",
 });
@@ -363,10 +363,10 @@ pub inline fn pushUserdata(s: *c.lua_State, d: anytype) LuaError!void {
 }
 pub inline fn pushLightUserdata(s: *c.lua_State, ptr: anytype) void {
     const ptr_ti = @typeInfo(@TypeOf(ptr));
-    if (ptr_ti != .Pointer) @compileError("Light userdata has to be a pointer");
-    switch (ptr_ti.Pointer.size) {
+    if (ptr_ti != .pointer) @compileError("Light userdata has to be a pointer");
+    switch (ptr_ti.pointer.size) {
         .Slice => @compileError("Light userdata has to be an actual pointer"),
-        .C, .One, .Many => {},
+        .c, .one, .many => {},
     }
     if (ptr_ti.Pointer.is_const) @compileError("Light userdata has to be a nont-const-pointer");
     c.lua_pushlightuserdata(s, @ptrCast(ptr));
@@ -445,11 +445,11 @@ pub fn pushValue(s: *c.lua_State, v: anytype) LuaError!void {
         inline .array, .@"struct", .optional, .@"enum", .@"union" => std.debug.panic("Unsupported Type for values", .{}),
         inline .pointer => |ptr_ti| {
             switch (ptr_ti.size) {
-                inline .Slice => {
+                inline .slice => {
                     const child_ti = @typeInfo(ptr_ti.child);
-                    if (child_ti == .Int and
-                        child_ti.Int.bits == 8 and
-                        child_ti.Int.signedness == .unsigned)
+                    if (child_ti == .int and
+                        child_ti.int.bits == 8 and
+                        child_ti.int.signedness == .unsigned)
                     {
                         try pushString(s, v);
                     } else {

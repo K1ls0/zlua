@@ -15,21 +15,12 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    //const luac_lib = b.addStaticLibrary(.{
-    //    .name = "luac",
-    //    .target = target,
-    //    .optimize = optimize,
-    //});
+
     luac_mod.addCSourceFiles(.{
         .root = luac_dep.path("src"),
         .files = c_files,
     });
     luac_mod.addIncludePath(luac_dep.path(""));
-
-    const luac_lib = b.addStaticLibrary(.{
-        .name = "lua",
-        .root_module = luac_mod,
-    });
 
     // zlua library
     const zlua_mod = b.addModule("zlua", .{
@@ -37,7 +28,7 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
         .root_source_file = b.path("src/root.zig"),
     });
-    zlua_mod.linkLibrary(luac_lib);
+    zlua_mod.addImport("luac", luac_mod);
 
     const lib = b.addStaticLibrary(.{
         .name = "zlua",
@@ -65,12 +56,8 @@ pub fn build(b: *std.Build) void {
         .name = "zig_lua_test",
         .root_module = exe_mod,
     });
-    exe.step.dependOn(&lib.step);
-<<<<<<< main
 
-=======
-    exe.root_module.addImport("zlua", lib.root_module);
->>>>>>> Upgrade build to 0.14.0
+    exe.step.dependOn(&lib.step);
     b.installArtifact(exe);
     const run_cmd = b.addRunArtifact(exe);
 

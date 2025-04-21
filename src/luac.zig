@@ -193,13 +193,13 @@ pub const lua_Number = f64;
 pub const lua_Integer = c_longlong;
 pub const lua_Unsigned = c_ulonglong;
 pub const lua_KContext = isize;
-pub const lua_CFunction = ?*const fn (?*lua_State) callconv(.C) c_int;
-pub const lua_KFunction = ?*const fn (?*lua_State, c_int, lua_KContext) callconv(.C) c_int;
-pub const lua_Reader = ?*const fn (?*lua_State, ?*anyopaque, [*c]usize) callconv(.C) [*c]const u8;
+pub const lua_CFunction = ?*const fn (?*lua_State) callconv(.c) c_int;
+pub const lua_KFunction = ?*const fn (?*lua_State, c_int, lua_KContext) callconv(.c) c_int;
+pub const lua_Reader = ?*const fn (?*lua_State, ?*anyopaque, [*c]usize) callconv(.c) [*c]const u8;
 pub const lua_Writer = ?*const fn (?*lua_State, ?*const anyopaque, usize, ?*anyopaque) callconv(.C) c_int;
-pub const lua_WarnFunction = ?*const fn (?*anyopaque, [*c]const u8, c_int) callconv(.C) void;
-pub const lua_Alloc = ?*const fn (?*anyopaque, ?*anyopaque, usize, usize) callconv(.C) ?*anyopaque;
-pub const lua_Hook = ?*const fn (?*lua_State, [*c]lua_Debug) callconv(.C) void;
+pub const lua_WarnFunction = ?*const fn (?*anyopaque, [*c]const u8, c_int) callconv(.c) void;
+pub const lua_Alloc = ?*const fn (?*anyopaque, ?*anyopaque, usize, usize) callconv(.c) ?*anyopaque;
+pub const lua_Hook = ?*const fn (?*lua_State, [*c]lua_Debug) callconv(.c) void;
 
 const BufInitArgs = extern union {
     n: lua_Number,
