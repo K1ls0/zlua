@@ -2,22 +2,6 @@ const std = @import("std");
 const log = std.log;
 pub const c = @import("luac.zig");
 
-pub const LuaError = error{
-    StateInit,
-    CodeSyntax,
-    CodeMem,
-    CodeRuntime,
-    UnknownFunction,
-    Conversion,
-    Lookup,
-    UnknownFunctionName,
-    NotExecutable,
-    UnexpectedType,
-    PointerNull,
-    UDCreation,
-    NoUserdata,
-};
-
 //const __builtin_expect = std.zig.c_builtins.__builtin_expect;
 
 //extern var stdin: [*c]FILE;
@@ -141,18 +125,18 @@ pub const LUA_REGISTRYINDEX = -LUAI_MAXSTACK - 1000;
 pub inline fn lua_upvalueindex(i: c_int) c_int {
     return LUA_REGISTRYINDEX - i;
 }
-pub const LuaType = enum(i8) {
-    none = c.LUA_TNONE,
-    nil = c.LUA_TNIL,
-    boolean = c.LUA_TBOOLEAN,
-    lightuserdata = c.LUA_TLIGHTUSERDATA,
-    number = c.LUA_TNUMBER,
-    string = c.LUA_TSTRING,
-    table = c.LUA_TTABLE,
-    function = c.LUA_TFUNCTION,
-    userdata = c.LUA_TUSERDATA,
-    thread = c.LUA_TTHREAD,
-};
+//pub const LuaType = enum(i8) {
+//    none = c.LUA_TNONE,
+//    nil = c.LUA_TNIL,
+//    boolean = c.LUA_TBOOLEAN,
+//    lightuserdata = c.LUA_TLIGHTUSERDATA,
+//    number = c.LUA_TNUMBER,
+//    string = c.LUA_TSTRING,
+//    table = c.LUA_TTABLE,
+//    function = c.LUA_TFUNCTION,
+//    userdata = c.LUA_TUSERDATA,
+//    thread = c.LUA_TTHREAD,
+//};
 
 pub const LuaOp = enum(u8) {
     add = c.LUA_OPADD,
@@ -334,28 +318,28 @@ pub inline fn getGlobal(s: *c.lua_State, name: [:0]const u8) LuaError!void {
         return LuaError.UnknownFunction;
     }
 }
-pub inline fn registerFn(s: *c.lua_State, n: [:0]const u8, f: c.lua_CFunction) void {
-    _ = lua_pushcfunction(s, f);
-    return c.lua_setglobal(s, n);
-}
+//pub inline fn registerFn(s: *c.lua_State, n: [:0]const u8, f: c.lua_CFunction) void {
+//    _ = lua_pushcfunction(s, f);
+//    return c.lua_setglobal(s, n);
+//}
 pub inline fn pop(L: *c.lua_State, n: c_int) void {
     return c.lua_settop(L, -n - 1);
 }
-pub inline fn pushNil(s: *c.lua_State) void {
-    c.lua_pushnil(s);
-}
-pub inline fn pushNumber(s: *c.lua_State, n: c.lua_Number) void {
-    c.lua_pushnumber(s, n);
-}
-pub inline fn pushInteger(s: *c.lua_State, n: c.lua_Integer) void {
-    c.lua_pushinteger(s, n);
-}
-pub inline fn pushString(s: *c.lua_State, str: []const u8) void {
-    _ = c.lua_pushlstring(s, str.ptr, str.len);
-}
-pub inline fn pushBool(s: *c.lua_State, b: bool) void {
-    c.lua_pushboolean(s, @intFromBool(b));
-}
+//pub inline fn pushNil(s: *c.lua_State) void {
+//    c.lua_pushnil(s);
+//}
+//pub inline fn pushNumber(s: *c.lua_State, n: c.lua_Number) void {
+//    c.lua_pushnumber(s, n);
+//}
+//pub inline fn pushInteger(s: *c.lua_State, n: c.lua_Integer) void {
+//    c.lua_pushinteger(s, n);
+//}
+//pub inline fn pushString(s: *c.lua_State, str: []const u8) void {
+//    _ = c.lua_pushlstring(s, str.ptr, str.len);
+//}
+//pub inline fn pushBool(s: *c.lua_State, b: bool) void {
+//    c.lua_pushboolean(s, @intFromBool(b));
+//}
 
 pub inline fn pushUserdata(s: *c.lua_State, d: anytype) LuaError!void {
     const ptr = c.lua_newuserdatauv(s, @sizeOf(@TypeOf(d)), 1) orelse return LuaError.UDCreation;
@@ -365,136 +349,525 @@ pub inline fn pushLightUserdata(s: *c.lua_State, ptr: anytype) void {
     const ptr_ti = @typeInfo(@TypeOf(ptr));
     if (ptr_ti != .pointer) @compileError("Light userdata has to be a pointer");
     switch (ptr_ti.pointer.size) {
-        .Slice => @compileError("Light userdata has to be an actual pointer"),
+        .Slice => @compileError("Light userdata has to be a raw pointer"),
         .c, .one, .many => {},
     }
-    if (ptr_ti.Pointer.is_const) @compileError("Light userdata has to be a nont-const-pointer");
+    if (ptr_ti.Pointer.is_const) @compileError("Light userdata has to be a non-const-pointer");
     c.lua_pushlightuserdata(s, @ptrCast(ptr));
 }
 
-pub fn toNumber(s: *c.lua_State, idx: c_int) LuaError!c.lua_Number {
-    var is_num: c_int = 0;
-    const r = c.lua_tonumberx(s, idx, &is_num);
+//pub fn toNumber(s: *c.lua_State, idx: c_int) LuaError!c.lua_Number {
+//    var is_num: c_int = 0;
+//    const r = c.lua_tonumberx(s, idx, &is_num);
+//
+//    if (is_num == 0) return LuaError.Conversion;
+//
+//    return r;
+//}
 
-    if (is_num == 0) return LuaError.Conversion;
+//pub fn toInteger(s: *c.lua_State, idx: c_int) LuaError!c.lua_Integer {
+//    var is_num: c_int = 0;
+//    const r = c.lua_tointegerx(s, idx, &is_num);
+//    if (is_num == 0) return LuaError.Conversion;
+//    return r;
+//}
 
-    return r;
-}
+//pub fn toString(s: *c.lua_State, idx: c_int) LuaError![:0]const u8 {
+//    var len: usize = 0;
+//    const r: ?[*:0]const u8 = @ptrCast(c.lua_tolstring(s, idx, &len));
+//    if (r) |rstr| {
+//        return rstr[0..len :0];
+//    } else {
+//        return LuaError.Conversion;
+//    }
+//}
 
-pub fn toInteger(s: *c.lua_State, idx: c_int) LuaError!c.lua_Integer {
-    var is_num: c_int = 0;
-    const r = c.lua_tointegerx(s, idx, &is_num);
-    if (is_num == 0) return LuaError.Conversion;
-    return r;
-}
+//pub inline fn toBool(s: *c.lua_State, idx: c_int) bool {
+//    return c.lua_toboolean(s, idx) != 0;
+//}
 
-pub fn toString(s: *c.lua_State, idx: c_int) LuaError![:0]const u8 {
-    var len: usize = 0;
-    const r: ?[*:0]const u8 = @ptrCast(c.lua_tolstring(s, idx, &len));
-    if (r) |rstr| {
-        return rstr[0..len :0];
-    } else {
-        return LuaError.Conversion;
-    }
-}
+//pub inline fn toPointer(s: *c.lua_State, comptime T: type, idx: c_int) LuaError!*const T {
+//    return @ptrCast(@alignCast(c.lua_topointer(s, idx) orelse {
+//        return LuaError.PointerNull;
+//    }));
+//}
 
-pub inline fn toBool(s: *c.lua_State, idx: c_int) bool {
-    return c.lua_toboolean(s, idx) != 0;
-}
-
-pub inline fn toPointer(s: *c.lua_State, comptime T: type, idx: c_int) LuaError!*const T {
-    return @ptrCast(@alignCast(c.lua_topointer(s, idx) orelse {
-        return LuaError.PointerNull;
-    }));
-}
 pub inline fn toUserdata(s: *c.lua_State, comptime T: type, idx: c_int) LuaError!*T {
     const ptr = c.lua_touserdata(s, idx) orelse LuaError.NoUserdata;
     return @ptrCast(@alignCast(ptr));
 }
 //pub extern fn lua_tothread(L: ?*lua_State, idx: c_int) ?*lua_State;
 
-pub fn printStack(s: *c.lua_State) void {
-    const top = c.lua_gettop(s);
+//pub fn pushValue(s: *c.lua_State, v: anytype) LuaError!void {
+//    const ti = @typeInfo(@TypeOf(v));
+//
+//    switch (ti) {
+//        inline .void => {},
+//        inline .null => pushNil(s),
+//        inline .bool => pushBool(s, v),
+//        inline .int => {
+//            if (v > std.math.maxInt(@TypeOf(v)) or
+//                v < std.math.minInt(@TypeOf(v)))
+//            {
+//                return LuaError.Conversion;
+//            }
+//            pushInteger(s, @intCast(v));
+//        },
+//        inline .float => pushNumber(s, @floatCast(v)),
+//        inline .array, .@"struct", .optional, .@"enum", .@"union" => std.debug.panic("Unsupported Type for values", .{}),
+//        inline .pointer => |ptr_ti| {
+//            switch (ptr_ti.size) {
+//                inline .slice => {
+//                    const child_ti = @typeInfo(ptr_ti.child);
+//                    if (child_ti == .int and
+//                        child_ti.int.bits == 8 and
+//                        child_ti.int.signedness == .unsigned)
+//                    {
+//                        try pushString(s, v);
+//                    } else {
+//                        pushLightUserdata(s, v);
+//                    }
+//                    return;
+//                },
+//                else => pushLightUserdata(s, v),
+//            }
+//        },
+//        else => @compileError("Unsupported type " ++ @typeName(@TypeOf(v))),
+//    }
+//}
+
+//pub fn toValue(s: *c.lua_State, comptime T: type, idx: c_int) LuaError!T {
+//    const ti = @typeInfo(T);
+//
+//    switch (ti) {
+//        inline .void => return {},
+//        inline .null => return null,
+//        inline .bool => return toBool(s, idx),
+//        inline .int => return toInteger(s, idx),
+//        inline .float => return toNumber(s, idx),
+//        inline .array => std.debug.panic("Arrays are currently unsupported", .{}),
+//        inline .@"struct" => std.debug.panic("Structs are currently unsupported", .{}),
+//        inline .optional => std.debug.panic("Optionals are currently unsupported", .{}),
+//        inline .@"enum" => std.debug.panic("Enums are currently unsupported", .{}),
+//        inline .@"union" => std.debug.panic("Unions are currently unsupported", .{}),
+//        inline .pointer => |ptr_ti| {
+//            comptime if (!ptr_ti.is_const) @compileError("Pointer has to be constant");
+//            switch (ptr_ti.size) {
+//                inline .Slice => {
+//                    const child_ti = @typeInfo(ptr_ti.child);
+//                    if (child_ti == .Int and
+//                        child_ti.Int.bits == 8 and
+//                        child_ti.Int.signedness == .unsigned)
+//                    {
+//                        return try toString(s, idx);
+//                    } else {
+//                        return toPointer(s, ptr_ti.child, idx);
+//                    }
+//                },
+//                else => return toPointer(s, ptr_ti.child, idx),
+//            }
+//        },
+//        else => @compileError("Unsupported type " ++ @typeName(T)),
+//    }
+//}
+
+pub const LuaError = error{
+    StateInit,
+    CodeSyntax,
+    CodeMem,
+    CodeRuntime,
+    UnknownFunction,
+    Conversion,
+    Lookup,
+    UnknownFunctionName,
+    NotExecutable,
+    UnexpectedType,
+    PointerNull,
+    UDCreation,
+    NoUserdata,
+} || RunLuaError || ConversionError;
+
+pub const RunLuaError = error{
+    Run,
+    Syntax,
+    Mem,
+    Err,
+};
+
+pub const ConversionError = error{
+    ToNil,
+    ToBool,
+    ToNumber,
+    ToInteger,
+    ToString,
+    ToTable,
+    ToFunction,
+    Conversion,
+};
+
+pub const EResult = enum {
+    ok,
+    yield,
+};
+pub fn toResult(e: c_int) RunLuaError!EResult {
+    switch (e) {
+        c.LUA_OK => return .ok,
+        c.LUA_YIELD => return .yield,
+        c.LUA_ERRRUN => return error.Run,
+        c.LUA_ERRSYNTAX => return error.Syntax,
+        c.LUA_ERRMEM => return error.Mem,
+        c.LUA_ERRERR => return error.Err,
+        else => unreachable,
+    }
+}
+
+pub fn errToCode(e: RunLuaError) c_int {
+    return switch (e) {
+        error.Run => return c.LUA_ERRRUN,
+        error.Syntax => return c.LUA_ERRSYNTAX,
+        error.Mem => return c.LUA_ERRMEM,
+        error.Err => return c.LUA_ERRERR,
+        else => return 10,
+    };
+}
+
+pub fn printStack(lua: *c.lua_State) void {
+    const top = c.lua_gettop(lua);
     if (top == 0) log.info("Stack empty", .{});
     log.info("stack:", .{});
+
     for (1..@intCast(top + 2)) |i| {
-        const tyname = std.mem.sliceTo(c.lua_typename(s, c.lua_type(s, @intCast(i))), 0);
-        log.info("\t[{d: >3}] {s} -> {s}", .{
-            i,
-            tyname,
-            toValue(s, []const u8, @intCast(i)) catch "<>",
-        });
+        const lua_type = c.lua_type(lua, @intCast(i));
+        const tyname = std.mem.sliceTo(c.lua_typename(lua, lua_type), 0);
+        switch (lua_type) {
+            c.LUA_TBOOLEAN => {
+                log.info("\t[{d: >3}] boolean -> {}", .{
+                    i,
+                    toValue(lua, @intCast(i), LuaType.Bool),
+                });
+            },
+            c.LUA_TNUMBER => {
+                log.info("\t[{d: >3}] number -> {}", .{
+                    i,
+                    toValue(lua, @intCast(i), LuaType.Number),
+                });
+            },
+            c.LUA_TSTRING => {
+                log.info("\t[{d: >3}] number -> '{s}'", .{
+                    i,
+                    toValue(lua, @intCast(i), LuaType.String)[0],
+                });
+            },
+            else => {
+                log.info("\t[{d: >3}] {s}", .{
+                    i,
+                    tyname,
+                });
+            },
+        }
     }
 }
-pub fn pushValue(s: *c.lua_State, v: anytype) LuaError!void {
-    const ti = @typeInfo(@TypeOf(v));
 
-    switch (ti) {
-        inline .void => {},
-        inline .null => pushNil(s),
-        inline .bool => pushBool(s, v),
-        inline .int => {
-            if (v > std.math.maxInt(@TypeOf(v)) or
-                v < std.math.minInt(@TypeOf(v)))
-            {
-                return LuaError.Conversion;
+pub const LuaTag = enum(c_int) {
+    none = -1,
+    nil = 0,
+    boolean = 1,
+    lightuserdata = 2,
+    number = 3,
+    string = 4,
+    table = 5,
+    function = 6,
+    userdata = 7,
+    thread = 8,
+    _,
+
+    pub fn fromCode(code: c_int) LuaTag {
+        return @enumFromInt(code);
+    }
+
+    pub fn toString(self: LuaTag) [:0]const u8 {
+        return std.enums.tagName(LuaTag, self) orelse "unknown";
+    }
+};
+
+pub const LuaType = struct {
+    pub const Nil = void;
+    pub const Bool = bool;
+    pub const Number = c.lua_Number;
+    pub const Int = c.lua_Integer;
+    pub const String = struct { [:0]const u8 };
+
+    pub const Function = struct { stack_offs: c_int };
+    pub const CFunction = struct { stack_offs: c_int };
+
+    pub const UserData = struct { []const u8 };
+    pub const LightUserData = struct { *anyopaque };
+    pub const Thread = struct { stack_ref: c_int };
+
+    pub fn isValidLuaType(comptime T: type) bool {
+        return switch (T) {
+            inline Nil,
+            Bool,
+            Number,
+            Int,
+            String,
+            Table,
+            Function,
+            CFunction,
+            LightUserData,
+            UserData,
+            => true,
+            inline else => @compileError("Unsupported type" ++ @typeName(T)),
+        };
+    }
+
+    pub fn luaTFromType(comptime T: type) c_int {
+        return switch (T) {
+            inline Nil => c.LUA_TNIL,
+            inline Bool => c.LUA_TBOOLEAN,
+            inline Number => c.LUA_TNUMBER,
+            inline Int => c.LUA_TNUMBER,
+            inline String => c.LUA_TSTRING,
+
+            inline Function => c.LUA_TFUNCTION,
+            inline CFunction => c.LUA_TFUNCTION,
+
+            inline UserData => c.LUA_TUSERDATA,
+            inline LightUserData => c.LUA_TLIGHTUSERDATA,
+            inline Thread => c.LUA_TTHREAD,
+            inline Table => c.LUA_TTABLE,
+        };
+    }
+
+    pub const Table = struct {
+        stack_offs: c_int,
+
+        pub fn get(
+            self: Table,
+            lua: *c.lua_State,
+            name: [:0]const u8,
+            comptime V: type,
+        ) ConversionError!V {
+            const lua_field_type = c.lua_getfield(lua, self.stack_offs, name.ptr);
+            if (lua_field_type != LuaType.luaTFromType(V)) {
+                return error.Conversion;
             }
-            pushInteger(s, @intCast(v));
+            return try toValue(lua, -1, V);
+        }
+    };
+};
+
+pub fn call(lua: *c.lua_State, name: ?[:0]const u8, args: anytype, comptime RetT: type) LuaError!RetT {
+    if (name) |n| {
+        switch (LuaTag.fromCode(c.lua_getglobal(lua, n.ptr))) {
+            .thread, .function => {},
+            else => |t| {
+                log.err("Non-Executable type '{s}'", .{t.toString()});
+                return LuaError.NotExecutable;
+            },
+        }
+    }
+
+    const r_ti = @typeInfo(RetT);
+
+    const params_count = args.len;
+    const retval_count = if (comptime r_ti == .@"struct" and !LuaType.isValidLuaType(RetT))
+        r_ti.@"struct".fields.len
+    else
+        1;
+
+    inline for (args) |carg| pushValue(lua, carg);
+    switch (try toResult(c.lua_pcallk(lua, params_count, retval_count, 0, 0, null))) {
+        .ok => {},
+        .yield => {},
+    }
+
+    if (RetT == void) return {};
+
+    if (comptime r_ti == .@"struct" and !LuaType.isValidLuaType(RetT)) {
+        var ret: RetT = undefined;
+        // TODO: Reverse?
+        inline for (r_ti.@"struct".fields) |field| {
+            @field(ret, field.name) = try popValue(lua, @TypeOf(@field(ret, field.name)));
+        }
+        return ret;
+    } else {
+        return try popValue(lua, RetT);
+    }
+}
+//const params_count = args_ti.@"struct".fields.len;
+
+pub fn pushValue(lua: *c.lua_State, v: anytype) void {
+    switch (@TypeOf(v)) {
+        inline LuaType.Nil => c.lua_pushnil(lua, v),
+        inline LuaType.Bool => c.lua_pushboolean(lua, v),
+        inline LuaType.Number => c.lua_pushnumber(lua, v),
+        inline LuaType.Int => c.lua_pushinteger(lua, v),
+        inline LuaType.String => _ = c.lua_pushlstring(lua, v[0].ptr, v[0].len),
+        inline LuaType.Table => @compileError("Currently unsupported"),
+        inline LuaType.Function => @compileError("Currently unsupported"),
+        inline else => @compileError("Unsupported type" ++ @typeName(@TypeOf(v))),
+    }
+}
+
+/// Get a value from the stack (growing up, top of the stack is '-1').
+pub fn toValue(lua: *c.lua_State, stack_offset: c_int, comptime T: type) ConversionError!T {
+    switch (T) {
+        inline LuaType.Nil => {
+            if (!lua_isnil(lua, stack_offset)) {
+                log.err("Value from stack is not nil (was {s})", .{
+                    luaL_typename(lua, stack_offset),
+                });
+                return error.ToNil;
+            }
+            return .{};
         },
-        inline .float => pushNumber(s, @floatCast(v)),
-        inline .array, .@"struct", .optional, .@"enum", .@"union" => std.debug.panic("Unsupported Type for values", .{}),
-        inline .pointer => |ptr_ti| {
-            switch (ptr_ti.size) {
-                inline .slice => {
-                    const child_ti = @typeInfo(ptr_ti.child);
-                    if (child_ti == .int and
-                        child_ti.int.bits == 8 and
-                        child_ti.int.signedness == .unsigned)
-                    {
-                        try pushString(s, v);
-                    } else {
-                        pushLightUserdata(s, v);
+        inline LuaType.Bool => {
+            if (!lua_isboolean(lua, stack_offset)) {
+                log.err("Value from stack is not a boolean (was {s})", .{
+                    luaL_typename(lua, stack_offset),
+                });
+                return error.ToBool;
+            }
+            return c.lua_toboolean(lua, stack_offset) != 0;
+        },
+        inline LuaType.Number => {
+            if (!(c.lua_isnumber(lua, stack_offset) != 0)) {
+                log.err("Value from stack is not a number (was {s})", .{
+                    luaL_typename(lua, stack_offset),
+                });
+                return error.ToNumber;
+            }
+            return c.lua_tonumberx(lua, stack_offset, null);
+        },
+        inline LuaType.Int => {
+            if (!(c.lua_isinteger(lua, stack_offset) != 0)) {
+                log.err("Value from stack is not an integer (was {s})", .{
+                    luaL_typename(lua, stack_offset),
+                });
+                return error.ToInteger;
+            }
+            return c.lua_tointegerx(lua, stack_offset, null);
+        },
+        inline LuaType.String => {
+            if (!(c.lua_isstring(lua, stack_offset) != 0)) {
+                log.err("Value from stack is not a string (was {s})", .{
+                    luaL_typename(lua, stack_offset),
+                });
+                return error.ToString;
+            }
+            var str_len: usize = 0;
+            const str_ptr = c.lua_tolstring(lua, stack_offset, &str_len) orelse @panic("String is null");
+            return LuaType.String{@ptrCast(str_ptr[0..str_len])};
+        },
+        inline LuaType.UserData => {
+            @panic("TODO");
+        },
+        inline LuaType.LightUserData => {
+            @panic("TODO");
+        },
+        inline LuaType.Table => {
+            if (!lua_istable(lua, stack_offset)) {
+                log.err("Value from stack is not a table (was {s})", .{
+                    luaL_typename(lua, stack_offset),
+                });
+                return error.ToTable;
+            }
+            return LuaType.Table{ .stack_offs = stack_offset };
+        },
+        inline LuaType.Function => {
+            if (!lua_isfunction(lua, stack_offset)) {
+                log.err("Value from stack is not a function (was {s})", .{
+                    luaL_typename(lua, stack_offset),
+                });
+                return error.ToFunction;
+            }
+            return LuaType.Function{ .stack_offs = stack_offset };
+        },
+        inline else => @compileError("Unsupported type" ++ @typeName(T)),
+    }
+}
+
+pub fn popValue(lua: *c.lua_State, comptime T: type) ConversionError!T {
+    pop(lua, 1);
+    return try toValue(lua, 0, T);
+}
+
+pub fn registerFn(lua: *c.lua_State, comptime name: ?[:0]const u8, func: anytype) LuaError!void {
+    const fn_info = @typeInfo(@TypeOf(func)).@"fn";
+    const params = fn_info.params;
+    const RetT = fn_info.return_type.?;
+
+    const ArgsStore = ArgsStruct(@TypeOf(func));
+
+    const C = struct {
+        pub fn callFunc(l_opt: ?*c.lua_State) callconv(.c) c_int {
+            const l = l_opt.?;
+
+            var args_call: ArgsStore = undefined;
+            inline for (params, 0..) |param, i| {
+                const AT = param.type.?;
+                args_call[i] = toValue(l, @intCast(i + 1), AT) catch |e| {
+                    log.err("Error while getting value of type " ++ @typeName(AT) ++ ": {}", .{e});
+                    return 0;
+                };
+            }
+
+            const ret: RetT = @call(.auto, func, args_call);
+
+            if (comptime RetT != void) {
+                if (comptime @typeInfo(RetT) == .@"struct" and !LuaType.isValidLuaType(RetT)) {
+                    inline for (ret) |item| {
+                        pushValue(l, item);
                     }
-                    return;
-                },
-                else => pushLightUserdata(s, v),
-            }
-        },
-        else => @compileError("Unsupported type " ++ @typeName(@TypeOf(v))),
-    }
+                    return @typeInfo(RetT).@"struct".fields.len;
+                } else {
+                    pushValue(l, ret);
+                    return 1;
+                }
+            } else return 0;
+        }
+    };
+
+    c.lua_pushcclosure(lua, &C.callFunc, 0);
+
+    if (name) |n| c.lua_setglobal(lua, n.ptr);
 }
 
-pub fn toValue(s: *c.lua_State, comptime T: type, idx: c_int) LuaError!T {
-    const ti = @typeInfo(T);
+fn ArgsStruct(comptime Fn: type) type {
+    const fn_info = @typeInfo(Fn).@"fn";
+    const args = fn_info.params;
 
-    switch (ti) {
-        inline .void => return,
-        inline .null => return null,
-        inline .bool => return toBool(s, idx),
-        inline .int => return toInteger(s, idx),
-        inline .float => return toNumber(s, idx),
-        inline .array => std.debug.panic("Arrays are currently unsupported", .{}),
-        inline .@"struct" => std.debug.panic("Structs are currently unsupported", .{}),
-        inline .optional => std.debug.panic("Optionals are currently unsupported", .{}),
-        inline .@"enum" => std.debug.panic("Enums are currently unsupported", .{}),
-        inline .@"union" => std.debug.panic("Unions are currently unsupported", .{}),
-        inline .pointer => |ptr_ti| {
-            comptime if (!ptr_ti.is_const) @compileError("Pointer has to be constant");
-            switch (ptr_ti.size) {
-                inline .Slice => {
-                    const child_ti = @typeInfo(ptr_ti.child);
-                    if (child_ti == .Int and
-                        child_ti.Int.bits == 8 and
-                        child_ti.Int.signedness == .unsigned)
-                    {
-                        return try toString(s, idx);
-                    } else {
-                        return toPointer(s, ptr_ti.child, idx);
-                    }
-                },
-                else => return toPointer(s, ptr_ti.child, idx),
-            }
-        },
-        else => @compileError("Unsupported type " ++ @typeName(T)),
-    }
+    comptime var ti = std.builtin.Type.Struct{
+        .layout = .auto,
+        .is_tuple = true,
+        .backing_integer = null,
+        .fields = &.{},
+        .decls = &.{},
+    };
+
+    comptime for (args, 0..) |arg, i| {
+        const FieldType = arg.type orelse unreachable;
+        ti.fields = ti.fields ++ &[_]std.builtin.Type.StructField{
+            std.builtin.Type.StructField{
+                .name = std.fmt.comptimePrint("{}", .{i}),
+                .type = FieldType,
+                .alignment = @alignOf(FieldType),
+                .default_value_ptr = null,
+                .is_comptime = false,
+            },
+        };
+    };
+
+    return @Type(std.builtin.Type{ .@"struct" = ti });
 }
+
+//inline fn isMultiReturn(comptime Fn: type) bool {
+//    const RetT = @typeInfo(Fn).@"fn".return_type.?;
+//    return @typeInfo(RetT) == .@"struct" and @typeInfo(RetT).@"struct".is_tuple;
+//}
+
+//fn RetStruct(comptime Fn: type) type {
+//    const RetT = @typeInfo(Fn).@"fn".return_type.?;
+//    return if (isMultiReturn(Fn)) return RetT else return struct { RetT };
+//}

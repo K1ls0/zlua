@@ -46,7 +46,7 @@ pub fn build(b: *std.Build) void {
 
     // Executable
     const exe_mod = b.addModule("zig_lua_test", .{
-        .root_source_file = b.path("src/main.zig"),
+        .root_source_file = b.path("run_prog/main.zig"),
         .target = target,
         .optimize = optimize,
     });

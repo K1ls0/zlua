@@ -6,12 +6,12 @@ const zlua = @import("zlua");
 const FILENAME: []const u8 = "./test.lua";
 
 const PCli = struct {
-    filename: []const u8,
+    filename: [:0]const u8,
 
     pub fn parse() PCli {
         const max_positionals = 1;
 
-        var filename: ?[]const u8 = null;
+        var filename: ?[:0]const u8 = null;
 
         var positional_idx: usize = 0;
         var state = State.normal;
@@ -133,29 +133,40 @@ pub fn main() !void {
     {
         var f = try std.fs.cwd().openFile(args.filename, .{ .mode = .read_only });
         defer f.close();
-        try state.load(allocator, f.reader(), null);
+        try state.load(allocator, f.reader(), args.filename, null);
     }
 
     log.info("code eval", .{});
-    try state.callFn(null, .{}, void);
+    try state.call(null, .{}, void);
 
     try state.registerFn("Mul2", mul2);
 
     log.info("Mul func", .{});
-    const r = try state.callFn("Mul", .{
+    const r = try state.call("Mul", .{
         @as(f64, 10),
         @as(f64, 2),
     }, f64);
     log.info("Got out {d}", .{r});
 
     log.info("Mul2 func", .{});
-    const r2 = try state.callFn("Mul2", .{
+    const r2 = try state.call("Mul2", .{
         @as(f64, 10),
         @as(f64, 2),
     }, f64);
     log.info("Got out {d}", .{r2});
 
-    try state.callFn("Main", .{}, void);
+    try state.call("Main", .{}, void);
+
+    const ret = state.call(
+        "Concat",
+        .{ zlua.LuaType.String{"This is some test: "}, @as(zlua.LuaType.Number, 32) },
+        zlua.LuaType.String,
+    ) catch |e| {
+        log.err("Got err while calling concat: {}", .{e});
+        log.err("[lua]: {s}", .{state.getErrString()});
+        return;
+    };
+    log.info("Returned from concat: '{s}'", .{ret[0]});
 }
 
 fn mul2(a: f64, b: f64) f64 {
