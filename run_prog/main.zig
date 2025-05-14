@@ -3,7 +3,75 @@ const builtin = @import("builtin");
 const log = std.log;
 const zlua = @import("zlua");
 
-const FILENAME: []const u8 = "./test.lua";
+//var debug_allocator: std.heap.DebugAllocator(.{ .safety = true }) = .init;
+//
+//const allocator = if (builtin.mode == .Debug or builtin.mode == .ReleaseSafe) debug_allocator.allocator() else std.heap.smp_allocator;
+//
+//fn deinitAllocator() void {
+//    if (comptime builtin.mode == .Debug or builtin.mode == .ReleaseSafe) {
+//        std.debug.assert(debug_allocator.deinit() == .ok);
+//    }
+//}
+
+pub fn main() !void {
+    var default_allocator = DefaultAllocator.init;
+    defer default_allocator.deinit();
+    const allocator = default_allocator.allocator();
+
+    const args = PCli.parse();
+
+    std.log.info("filename: {s}", .{args.filename});
+
+    var state = try zlua.State().init(
+        allocator,
+        .{
+            .lib = zlua.StdLib.all,
+        },
+    );
+    defer state.deinit();
+
+    {
+        var f = try std.fs.cwd().openFile(args.filename, .{ .mode = .read_only });
+        defer f.close();
+        try state.load(allocator, f.reader(), args.filename, null);
+    }
+
+    log.info("code eval", .{});
+    try state.call(null, .{}, void);
+
+    try state.registerFn("Mul2", mul2);
+
+    log.info("Mul func", .{});
+    const r = try state.call("Mul", .{
+        @as(f64, 10),
+        @as(f64, 2),
+    }, f64);
+    log.info("Got out {d}", .{r});
+
+    log.info("Mul2 func", .{});
+    const r2 = try state.call("Mul2", .{
+        @as(f64, 10),
+        @as(f64, 2),
+    }, f64);
+    log.info("Got out {d}", .{r2});
+
+    try state.call("Main", .{}, void);
+
+    const ret = state.call(
+        "Concat",
+        .{ zlua.LuaType.String{"This is some test: "}, @as(zlua.LuaType.Number, 32) },
+        zlua.LuaType.String,
+    ) catch |e| {
+        log.err("Got err while calling concat: {}", .{e});
+        log.err("[lua]: {s}", .{state.getErrString()});
+        return;
+    };
+    log.info("Returned from concat: '{s}'", .{ret[0]});
+}
+
+fn mul2(a: f64, b: f64) f64 {
+    return a * b;
+}
 
 const PCli = struct {
     filename: [:0]const u8,
@@ -102,73 +170,3 @@ const DefaultAllocator = struct {
         return builtin.mode == .Debug or builtin.mode == .ReleaseSafe;
     }
 };
-
-//var debug_allocator: std.heap.DebugAllocator(.{ .safety = true }) = .init;
-//
-//const allocator = if (builtin.mode == .Debug or builtin.mode == .ReleaseSafe) debug_allocator.allocator() else std.heap.smp_allocator;
-//
-//fn deinitAllocator() void {
-//    if (comptime builtin.mode == .Debug or builtin.mode == .ReleaseSafe) {
-//        std.debug.assert(debug_allocator.deinit() == .ok);
-//    }
-//}
-
-pub fn main() !void {
-    var default_allocator = DefaultAllocator.init;
-    defer default_allocator.deinit();
-    const allocator = default_allocator.allocator();
-
-    const args = PCli.parse();
-
-    std.log.info("filename: {s}", .{args.filename});
-
-    var state = try zlua.State().init(
-        allocator,
-        .{
-            .lib = zlua.StdLib.all,
-        },
-    );
-    defer state.deinit();
-
-    {
-        var f = try std.fs.cwd().openFile(args.filename, .{ .mode = .read_only });
-        defer f.close();
-        try state.load(allocator, f.reader(), args.filename, null);
-    }
-
-    log.info("code eval", .{});
-    try state.call(null, .{}, void);
-
-    try state.registerFn("Mul2", mul2);
-
-    log.info("Mul func", .{});
-    const r = try state.call("Mul", .{
-        @as(f64, 10),
-        @as(f64, 2),
-    }, f64);
-    log.info("Got out {d}", .{r});
-
-    log.info("Mul2 func", .{});
-    const r2 = try state.call("Mul2", .{
-        @as(f64, 10),
-        @as(f64, 2),
-    }, f64);
-    log.info("Got out {d}", .{r2});
-
-    try state.call("Main", .{}, void);
-
-    const ret = state.call(
-        "Concat",
-        .{ zlua.LuaType.String{"This is some test: "}, @as(zlua.LuaType.Number, 32) },
-        zlua.LuaType.String,
-    ) catch |e| {
-        log.err("Got err while calling concat: {}", .{e});
-        log.err("[lua]: {s}", .{state.getErrString()});
-        return;
-    };
-    log.info("Returned from concat: '{s}'", .{ret[0]});
-}
-
-fn mul2(a: f64, b: f64) f64 {
-    return a * b;
-}
