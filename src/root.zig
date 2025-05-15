@@ -75,7 +75,7 @@ pub fn State() type {
         /// If `name` parameter is null, the resulting thread is only being
         /// pushed onto the stack.
         pub fn load(
-            self: *Self,
+            self: Self,
             allocator: mem.Allocator,
             reader: anytype,
             filename: ?[:0]const u8,
